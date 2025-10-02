@@ -1,0 +1,122 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.screen {
+  width: 100%;
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#start-screen {
+  background-image: url("img/bg_start.png");
+}
+
+#draw-screen {
+  background-image: url("img/bg_draw.png");
+}
+
+.hidden { display: none; }
+
+/* ========== Banner 样式 ========== */
+#banner-text {
+  position: absolute;
+  top: 7%;          /* 距离顶部 7% */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  color: white;
+}
+
+/* 字体效果 */
+.浮雕 { text-shadow: 2px 2px 5px gray; }
+.发光 { text-shadow: 0 0 12px yellow; }
+.描边 { -webkit-text-stroke: 1px black; color: white; }
+.霓虹 { text-shadow: 0 0 8px #0ff, 0 0 15px #0ff; }
+
+#slot-machine {
+  position: relative;
+  width: 300px;
+  height: 150px;
+  margin: 120px auto 20px; /* 留出上方空间给 banner */
+}
+.slot-frame {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+#slot-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: bold;
+  color: red;
+  background: rgba(255,255,255,0.7);
+  padding: 5px 10px;
+  border-radius: 8px;
+}
+
+#winners-list {
+  margin: 20px auto;
+  width: 90%;
+  position: relative;
+}
+.winners-box { width: 100%; height: auto; }
+#winners-ul {
+  position: absolute;
+  top: 20%;
+  left: 10%;
+  right: 10%;
+  bottom: 10%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  font-size: 16px;
+  overflow-y: auto;
+}
+
+.img-btn {
+  width: 80px;
+  height: 40px;
+  margin: 5px;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.img-btn:hover {
+  filter: drop-shadow(0 0 6px rgba(255,215,0,0.8));
+}
+.img-btn:active {
+  transform: scale(0.9);
+  filter: drop-shadow(0 0 10px rgba(255,255,0,1));
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+#confetti {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
