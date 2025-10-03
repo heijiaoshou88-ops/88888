@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <title>抽奖系统</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- ========== 启动界面 ========== -->
+  <!-- ====== 开始界面 ====== -->
   <div id="start-screen" class="screen">
     <div class="panel">
       <label>选择中奖人数:</label>
@@ -16,7 +15,6 @@
         <option value="2">2</option>
         <option value="3">3</option>
         <option value="5">5</option>
-        <option value="10">10</option>
       </select>
 
       <label>动画速度:</label>
@@ -30,15 +28,13 @@
       <label>参赛 ID (每行一个):</label>
       <textarea id="participants" rows="6"></textarea>
 
-      <div style="margin-top:15px;">
-        <button id="start-btn" class="img-btn start-btn"></button>
-      </div>
+      <button id="start-btn" class="img-btn start-btn"></button>
     </div>
   </div>
 
-  <!-- ========== 抽奖界面 ========== -->
+  <!-- ====== 抽奖界面 ====== -->
   <div id="draw-screen" class="screen hidden">
-    <!-- 顶部 Banner -->
+    <!-- Banner 文字 -->
     <div id="banner-text"></div>
 
     <!-- 老虎机 -->
@@ -53,7 +49,7 @@
       <ul id="winners-ul"></ul>
     </div>
 
-    <!-- 操作按钮 -->
+    <!-- 按钮 -->
     <div class="buttons">
       <button id="copy-btn" class="img-btn copy-btn"></button>
       <button id="back-btn" class="img-btn back-btn"></button>
@@ -67,6 +63,7 @@
     <canvas id="confetti"></canvas>
   </div>
 
+  <!-- 引入逻辑 -->
   <script src="app.js"></script>
 </body>
 </html>
