@@ -1,5 +1,5 @@
 // ================= API 地址 =================
-const API_URL = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare";
+const API_URL = "https://mylottery.loophole.site/api/draw/prepare";
 
 // ================= 全局变量 =================
 let winners = [];
@@ -13,7 +13,7 @@ const winnersUl = document.getElementById("winners-ul");
 const canvas = document.getElementById("confetti");
 const ctx = canvas.getContext("2d");
 
-// ================= 让 canvas 随屏幕自适应 =================
+// ================= Canvas resize =================
 function resizeCanvas() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -42,17 +42,17 @@ function parseParticipants(text) {
 
 // ================= 老虎机滚动逻辑 =================
 function spinSlotForSeconds(seconds, finalId, allIds) {
+  console.log("开始转动，持续秒数:", seconds, "最终ID:", finalId);
   return new Promise(resolve => {
-    let counter = 0;
     const interval = setInterval(() => {
       const fake = allIds[Math.floor(Math.random() * allIds.length)];
       slotDisplay.innerText = fake;
-      counter++;
     }, 80 / playbackSpeed);
 
     setTimeout(() => {
       clearInterval(interval);
       slotDisplay.innerText = finalId;
+      console.log("转动结束，停在:", finalId);
       resolve();
     }, seconds * 1000);
   });
@@ -60,8 +60,9 @@ function spinSlotForSeconds(seconds, finalId, allIds) {
 
 // ================= 粒子掉落动画 =================
 function launchConfetti() {
+  console.log("触发粒子雨效果");
   let particles = [];
-  const count = 30 + Math.floor(Math.random() * 30); // 30~60 粒子
+  const count = 30 + Math.floor(Math.random() * 30);
 
   for (let i = 0; i < count; i++) {
     let choice = Math.random();
@@ -90,9 +91,7 @@ function launchConfetti() {
       ctx.rotate((p.rotation * Math.PI) / 180);
       ctx.drawImage(p.img, -p.size / 2, -p.size / 2, p.size, p.size);
       ctx.restore();
-      p.y += p.speedY;
-      p.x += p.speedX;
-      p.rotation += p.rotationSpeed;
+      p.y += p.speedY; p.x += p.speedX; p.rotation += p.rotationSpeed;
     });
     particles = particles.filter(p => p.y < canvas.height + 50);
     if (particles.length > 0) requestAnimationFrame(drawFrame);
@@ -102,38 +101,36 @@ function launchConfetti() {
 
 // ================= 抽奖动画流程 =================
 async function playDraw(participants) {
+  console.log("开始执行抽奖动画，中奖名单:", winners);
   winnersUl.innerHTML = "";
 
   for (let i = 0; i < winners.length; i++) {
     const winner = winners[i];
 
-    // 转动 3 秒
     await spinSlotForSeconds(3, winner, participants);
 
-    // 放大中奖 ID
-    slotDisplay.style.transition = "transform 0.5s ease";
-    slotDisplay.style.transform = "scale(2)";
+    console.log("放大中奖 ID:", winner);
+    slotDisplay.classList.add("enlarged");
     await new Promise(r => setTimeout(r, 600));
 
-    // 粒子雨
     launchConfetti();
 
-    // 缩小回原来大小
-    slotDisplay.style.transform = "scale(1)";
+    slotDisplay.classList.remove("enlarged");
     await new Promise(r => setTimeout(r, 500));
 
-    // 添加到中奖名单框
+    console.log("加入到中奖名单:", winner);
     const li = document.createElement("li");
     li.textContent = `${i + 1}. ${winner}`;
     winnersUl.appendChild(li);
 
-    // 等待片刻再下一轮
     await new Promise(r => setTimeout(r, 800));
   }
+  console.log("抽奖流程完成 ✅");
 }
 
 // ================= 主流程 =================
 async function onStartButtonClicked() {
+  console.log("点击开始抽奖按钮");
   const participants = parseParticipants(document.getElementById("participants").value || "");
   const winnersCount = Number(document.getElementById("winner-count").value || 1);
   const speedSelect = document.getElementById("speed-select");
@@ -141,12 +138,15 @@ async function onStartButtonClicked() {
   if (speedSelect && speedSelect.value) playbackSpeed = Number(speedSelect.value);
 
   if (participants.length === 0) {
-    return alert("请输入至少 1 个参与者。");
+    alert("请输入至少 1 个参与者。");
+    return;
   }
   if (winnersCount <= 0 || winnersCount > participants.length) {
-    return alert("中奖人数必须在 1 到参与者数量之间。");
+    alert("中奖人数必须在 1 到参与者数量之间。");
+    return;
   }
 
+  console.log("发送请求到后端:", API_URL);
   try {
     const resp = await fetch(API_URL, {
       method: "POST",
@@ -155,27 +155,28 @@ async function onStartButtonClicked() {
     });
 
     const result = await resp.json();
+    console.log("收到后端返回:", result);
+
     if (!result.ok || !result.data) {
-      return alert("后端返回异常: " + JSON.stringify(result));
+      alert("后端返回异常: " + JSON.stringify(result));
+      return;
     }
 
     const data = result.data;
     winners = data.winners || [];
 
-    // 切换到抽奖界面
+    console.log("切到抽奖界面");
     startScreen.classList.add("hidden");
     drawScreen.classList.remove("hidden");
 
-    // 设置 banner
     bannerText.innerText = data.banner || "";
     bannerText.className = "";
     if (data.font_style) bannerText.classList.add(data.font_style);
 
-    // 播放抽奖动画
     await playDraw(participants);
 
-    // 回传 Telegram WebApp
     if (window.Telegram && Telegram.WebApp) {
+      console.log("回传结果到 Telegram");
       Telegram.WebApp.sendData(JSON.stringify({
         action: "draw_result",
         winners,
@@ -186,7 +187,7 @@ async function onStartButtonClicked() {
     }
 
   } catch (err) {
-    console.error(err);
+    console.error("请求失败:", err);
     alert("请求失败: " + (err.message || err));
   }
 }
@@ -194,17 +195,21 @@ async function onStartButtonClicked() {
 // ================= 按钮绑定 =================
 document.getElementById("start-btn").addEventListener("click", onStartButtonClicked);
 
-document.getElementById("speed-1").onclick = () => playbackSpeed = 1;
-document.getElementById("speed-2").onclick = () => playbackSpeed = 2;
-document.getElementById("speed-5").onclick = () => playbackSpeed = 5;
-document.getElementById("speed-10").onclick = () => playbackSpeed = 10;
+document.getElementById("speed-1").onclick = () => { playbackSpeed = 1; console.log("速度设为 1x"); };
+document.getElementById("speed-2").onclick = () => { playbackSpeed = 2; console.log("速度设为 2x"); };
+document.getElementById("speed-5").onclick = () => { playbackSpeed = 5; console.log("速度设为 5x"); };
+document.getElementById("speed-10").onclick = () => { playbackSpeed = 10; console.log("速度设为 10x"); };
 
 document.getElementById("copy-btn").onclick = () => {
   const text = winners.join("\n");
-  navigator.clipboard.writeText(text).then(() => alert("已复制中奖名单 ✅"));
+  navigator.clipboard.writeText(text).then(() => {
+    console.log("已复制中奖名单");
+    alert("已复制中奖名单 ✅");
+  });
 };
 
 document.getElementById("back-btn").onclick = () => {
+  console.log("返回设置界面");
   drawScreen.classList.add("hidden");
   startScreen.classList.remove("hidden");
   winnersUl.innerHTML = "";
@@ -215,6 +220,7 @@ document.getElementById("back-btn").onclick = () => {
 
 // ================= Telegram WebApp 初始化 =================
 if (window.Telegram && Telegram.WebApp) {
+  console.log("Telegram WebApp 初始化");
   Telegram.WebApp.ready();
   Telegram.WebApp.expand();
 }
