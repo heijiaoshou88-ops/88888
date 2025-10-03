@@ -1,16 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>抽奖系统</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- ========== 设置界面 ========== -->
+  <!-- ====== 设置页面 ====== -->
   <div id="start-screen" class="screen">
     <div class="panel">
-      <label for="winner-count">选择中奖人数:</label>
+      <label>选择中奖人数:</label>
       <select id="winner-count">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -18,27 +17,39 @@
         <option value="5">5</option>
       </select>
 
-      <label for="participants">参赛 ID (每行一个):</label>
+      <label>动画速度:</label>
+      <select id="speed-select">
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="5">5x</option>
+        <option value="10">10x</option>
+      </select>
+
+      <label>参赛 ID (每行一个):</label>
       <textarea id="participants" rows="6"></textarea>
 
       <button id="start-btn" class="img-btn start-btn"></button>
     </div>
   </div>
 
-  <!-- ========== 抽奖界面 ========== -->
+  <!-- ====== 抽奖页面 ====== -->
   <div id="draw-screen" class="screen hidden">
+    <!-- 顶部 Banner -->
     <div id="banner-text"></div>
 
+    <!-- 老虎机 -->
     <div id="slot-machine">
       <img src="img/slot_frame.png" class="slot-frame" />
-      <div id="slot-display">等待结果...</div>
+      <div id="slot-display">准备中...</div>
     </div>
 
+    <!-- 中奖名单 -->
     <div id="winners-list">
       <img src="img/winners_box.png" class="winners-box" />
       <ul id="winners-ul"></ul>
     </div>
 
+    <!-- 粒子层 -->
     <canvas id="confetti"></canvas>
   </div>
 
