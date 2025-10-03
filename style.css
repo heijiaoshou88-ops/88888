@@ -1,48 +1,51 @@
 body {
   margin: 0;
   font-family: "Microsoft YaHei", sans-serif;
-  background: url("img/bg_start.jpg") no-repeat center center fixed;
-  background-size: cover;
   color: #fff;
-  text-align: center;
   overflow-x: hidden;
 }
 
-.settings {
-  padding: 15px;
-  background: rgba(0,0,0,0.6);
-  border-bottom: 2px solid #444;
+.page {
+  position: absolute;
+  top:0;left:0;right:0;bottom:0;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 1s;
 }
 
-.settings textarea,
-.settings input,
-.settings select {
-  width: 90%;
-  margin: 5px 0;
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-container {
+  text-align: center;
+  background: rgba(0,0,0,0.5);
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.start-container textarea,
+.start-container input {
+  width: 250px;
+  margin: 10px 0;
   padding: 8px;
   border-radius: 6px;
   border: none;
 }
 
-.settings button {
-  margin-top: 10px;
-  padding: 8px 16px;
-  background: gold;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
+.start-btn {
+  width: 150px;
+  margin-top: 15px;
   cursor: pointer;
 }
 
-.banner {
-  margin: 20px 0;
-  font-size: 2rem;
+.lottery {
+  text-align: center;
 }
-
-/* 文字特效 */
-.glow { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffae00; }
-.emboss { text-shadow: 1px 1px 2px #000, -1px -1px 2px #fff; }
-.shadow { text-shadow: 2px 2px 6px #000; }
 
 .slot-frame {
   position: relative;
@@ -107,7 +110,7 @@ body {
   text-align: left;
 }
 
-/* 掉落物体 */
+/* 粒子 */
 .falling {
   position: fixed;
   top: -50px;
