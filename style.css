@@ -127,16 +127,22 @@ body {
   background-position: center;
   border: none;
   cursor: pointer;
+  transition: transform 0.2s, filter 0.2s;
+}
+.img-btn:hover {
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.9));
+}
+.img-btn:active {
+  transform: scale(0.9);
 }
 .start-btn { background-image: url("img/start_btn.png"); }
 
-/* 粒子效果覆盖全屏 */
+/* 粒子 */
 #confetti {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 9999;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
