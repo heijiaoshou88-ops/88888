@@ -1,155 +1,142 @@
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ 页面已加载，初始化中...");
+
   const startScreen = document.getElementById("start-screen");
   const drawScreen = document.getElementById("draw-screen");
   const startBtn = document.getElementById("start-btn");
+  const participantsInput = document.getElementById("participants");
+  const winnerCountSelect = document.getElementById("winner-count");
   const slotDisplay = document.getElementById("slot-display");
   const winnersUl = document.getElementById("winners-ul");
-  const confettiCanvas = document.getElementById("confetti");
-  const ctx = confettiCanvas.getContext("2d");
 
-  let animationInterval;
-  let particles = [];
   let participants = [];
-  let winners = [];
-  let speed = 1;
-  let currentRound = 0;
 
-  // 工具函数
+  // 点击开始按钮
+  startBtn.addEventListener("click", async () => {
+    console.log("🎬 点击开始抽奖按钮");
+
+    // 读取用户输入
+    participants = participantsInput.value
+      .split("\n")
+      .map(v => v.trim())
+      .filter(v => v !== "");
+    const winnerCount = parseInt(winnerCountSelect.value, 10);
+
+    if (participants.length === 0) {
+      alert("请输入至少一个参赛 ID");
+      return;
+    }
+
+    // 切换到抽奖界面
+    startScreen.classList.add("hidden");
+    drawScreen.classList.remove("hidden");
+    console.log("🔀 已切换到抽奖界面");
+
+    try {
+      const resp = await fetch("https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          participants: participants,
+          winners_count: winnerCount
+        })
+      });
+
+      const data = await resp.json();
+      console.log("✅ 后端返回数据：", data);
+
+      if (data.winners && data.winners.length > 0) {
+        await runDrawAnimation(data.winners);
+      } else {
+        alert("后端没有返回中奖结果");
+      }
+    } catch (err) {
+      console.error("❌ 请求后端失败：", err);
+      alert("抽奖失败，请检查网络或后端是否启动");
+    }
+  });
+
+  // 执行抽奖动画
+  async function runDrawAnimation(winners) {
+    for (const winner of winners) {
+      console.log("🎰 开始抽取 ID:", winner);
+
+      // 模拟老虎机随机滚动 3 秒
+      let counter = 0;
+      const spinInterval = setInterval(() => {
+        slotDisplay.innerText = participants[Math.floor(Math.random() * participants.length)];
+        counter++;
+      }, 100);
+
+      await delay(3000);
+      clearInterval(spinInterval);
+
+      // 显示中奖 ID
+      slotDisplay.innerText = winner;
+      slotDisplay.classList.add("enlarged");
+      startConfetti();
+
+      // 放大 1 秒
+      await delay(1000);
+
+      // 缩小并添加到中奖名单
+      slotDisplay.classList.remove("enlarged");
+      const li = document.createElement("li");
+      li.innerText = winner;
+      winnersUl.appendChild(li);
+
+      console.log("🏆 完成一轮抽奖，中奖ID:", winner);
+
+      await delay(800);
+    }
+
+    console.log("✅ 所有抽奖流程完成");
+  }
+
   function delay(ms) {
     return new Promise(r => setTimeout(r, ms));
   }
 
-  function resizeCanvas() {
-    confettiCanvas.width = window.innerWidth;
-    confettiCanvas.height = window.innerHeight;
-  }
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+  // 粒子效果
+  function startConfetti() {
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
 
-  // 粒子类（金币、钻石、元宝）
-  class Particle {
-    constructor(x, y, img) {
-      this.x = x;
-      this.y = y;
-      this.vx = (Math.random() - 0.5) * 5;
-      this.vy = Math.random() * -5 - 2;
-      this.gravity = 0.2;
-      this.img = img;
-      this.size = 30 + Math.random() * 20;
-    }
-    update() {
-      this.x += this.vx;
-      this.y += this.vy;
-      this.vy += this.gravity;
-    }
-    draw() {
-      ctx.drawImage(this.img, this.x, this.y, this.size, this.size);
-    }
-  }
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-  // 启动粒子掉落
-  function triggerConfetti() {
-    const images = ["coin1.png", "coin2.png", "coin3.png", "gold1.png", "gold2.png", "gold3.png", "diamond.png"];
-    for (let i = 0; i < 30; i++) {
-      const img = new Image();
-      img.src = "img/" + images[Math.floor(Math.random() * images.length)];
-      const p = new Particle(Math.random() * confettiCanvas.width, confettiCanvas.height, img);
-      particles.push(p);
-    }
-  }
-
-  function animateParticles() {
-    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-    particles.forEach((p, i) => {
-      p.update();
-      p.draw();
-      if (p.y > confettiCanvas.height) particles.splice(i, 1);
-    });
-    requestAnimationFrame(animateParticles);
-  }
-  animateParticles();
-
-  // 老虎机转动
-  function startSlotAnimation() {
-    let idx = 0;
-    animationInterval = setInterval(() => {
-      const randomId = participants[Math.floor(Math.random() * participants.length)];
-      slotDisplay.innerText = randomId;
-      idx++;
-    }, 100 / speed);
-  }
-  function stopSlotAnimation() {
-    clearInterval(animationInterval);
-  }
-
-  // 抽奖流程
-  async function runDrawRound(id) {
-    startSlotAnimation();
-    await delay(3000 / speed);
-    stopSlotAnimation();
-
-    // 显示中奖 ID
-    slotDisplay.innerText = id;
-    slotDisplay.classList.add("enlarged");
-    triggerConfetti();
-
-    await delay(1500);
-    slotDisplay.classList.remove("enlarged");
-
-    const li = document.createElement("li");
-    li.innerText = id;
-    winnersUl.appendChild(li);
-
-    await delay(1000);
-  }
-
-  async function runDraw() {
-    for (let i = 0; i < winners.length; i++) {
-      await runDrawRound(winners[i]);
-    }
-    console.log("所有抽奖完成 ✅");
-  }
-
-  // 绑定开始按钮
-  startBtn.addEventListener("click", async () => {
-    const count = parseInt(document.getElementById("winner-count").value, 10);
-    participants = document.getElementById("participants").value.trim().split("\n").filter(x => x);
-    speed = parseFloat(document.getElementById("speed-select").value.replace("x", ""));
-
-    if (participants.length === 0) {
-      alert("请先输入参与 ID！");
-      return;
-    }
-
-    // 切换到抽奖页面
-    startScreen.classList.add("hidden");
-    drawScreen.classList.remove("hidden");
-
-    // 请求后端获取中奖结果
-    const API_URL = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare";
-    try {
-      const resp = await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          participants,
-          winners_count: count
-        })
+    let particles = [];
+    for (let i = 0; i < 40; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: -20,
+        r: Math.random() * 10 + 5,
+        d: Math.random() * 2 + 1
       });
-      const result = await resp.json();
-      winners = result.data?.winners || [];
-      console.log("后端返回中奖名单：", winners);
-
-      if (winners.length === 0) {
-        alert("后端没返回中奖结果！");
-        return;
-      }
-
-      await runDraw();
-
-    } catch (err) {
-      console.error("请求失败：", err);
-      alert("无法连接后端 API");
     }
-  });
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "gold";
+      ctx.beginPath();
+      for (let p of particles) {
+        ctx.moveTo(p.x, p.y);
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2, true);
+      }
+      ctx.fill();
+      update();
+    }
+
+    function update() {
+      for (let p of particles) {
+        p.y += p.d;
+        if (p.y > canvas.height) {
+          p.y = -20;
+          p.x = Math.random() * canvas.width;
+        }
+      }
+    }
+
+    setInterval(draw, 30);
+  }
 });
