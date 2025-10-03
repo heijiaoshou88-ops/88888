@@ -7,39 +7,46 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 抽奖设置区 -->
+  <!-- 设置表单 -->
   <div class="settings">
     <h2>抽奖设置</h2>
-    <label>候选ID（每行一个）：</label>
-    <textarea id="idsInput" placeholder="输入参与抽奖的ID"></textarea>
-
-    <label>中奖人数：</label>
-    <input type="number" id="winnersCount" value="1" min="1">
-
-    <label>Banner文字：</label>
-    <input type="text" id="bannerText" placeholder="例如：XXX直播间">
-
-    <label>文字效果：</label>
+    <textarea id="idsInput" placeholder="输入候选ID，每行一个"></textarea>
+    <input type="number" id="winnersCount" placeholder="中奖人数" value="1" min="1">
+    <input type="text" id="bannerText" placeholder="Banner文字 (例如：XXX直播间)">
     <select id="fontStyle">
       <option value="glow">发光</option>
       <option value="emboss">浮雕</option>
       <option value="shadow">描边阴影</option>
     </select>
-
     <button id="prepareBtn">提交设置</button>
   </div>
 
-  <!-- 抽奖显示区 -->
+  <!-- 抽奖区 -->
   <div class="lottery">
     <h1 id="banner" class="banner">抽奖机</h1>
-    <div id="slotMachine" class="slot-machine">
+
+    <div class="slot-frame">
+      <img src="img/slot_frame.png" class="frame" alt="slot frame">
       <div class="slot-window">
         <span id="rollingId">---</span>
       </div>
     </div>
-    <button id="startBtn" disabled>开始抽奖</button>
+
+    <div class="buttons">
+      <img id="startBtn" src="img/start_btn.png" alt="start" class="btn">
+      <img id="backBtn" src="img/back_btn.png" alt="back" class="btn">
+      <img id="copyBtn" src="img/copy_btn.png" alt="copy" class="btn">
+    </div>
+
+    <div class="speed-buttons">
+      <img src="img/speed1.png" class="speed-btn" data-speed="1">
+      <img src="img/speed2.png" class="speed-btn" data-speed="2">
+      <img src="img/speed5.png" class="speed-btn" data-speed="5">
+      <img src="img/speed10.png" class="speed-btn" data-speed="10">
+    </div>
+
     <div class="winners-box">
-      <h3>中奖名单</h3>
+      <img src="img/winners_box.png" class="winners-bg">
       <ul id="winnersList"></ul>
     </div>
   </div>
