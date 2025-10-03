@@ -35,12 +35,14 @@ goDrawBtn.addEventListener("click", async () => {
       })
     });
     const data = await res.json();
+    console.log("prepare 返回原始数据:", data);
+
     drawId = data.draw_id;
+    console.log("✅ drawId 已保存:", drawId);
+
     winnersCount = count;
     drawnSoFar = 0;
     winnersList.innerHTML = "";
-
-    console.log("✅ drawId 已保存:", drawId);
 
     // 切换页面
     startPage.classList.add("hidden");
@@ -64,7 +66,7 @@ startBtn.addEventListener("click", async () => {
     return;
   }
 
-  // 老虎机随机滚动 3s
+  // 老虎机随机滚动
   rollingId.textContent = "转动中...";
   let rollTimer = setInterval(() => {
     const rand = Math.floor(Math.random() * 999999);
@@ -89,19 +91,20 @@ startBtn.addEventListener("click", async () => {
         return;
       }
 
-      // 中奖动画：放大闪烁 → 缩小进入 winners_box
+      // 中奖动画：放大闪烁
       rollingId.textContent = winner;
       rollingId.style.transition = "all 0.5s ease";
       rollingId.style.transform = "scale(2)";
       rollingId.style.color = "gold";
 
       setTimeout(() => {
+        // 缩小回位
         rollingId.style.transform = "scale(1)";
         rollingId.style.color = "#ffd700";
 
         // 移动到 winners_box
         const li = document.createElement("li");
-        li.textContent = `${drawnSoFar + 1}号: ${winner}`;
+        li.textContent = `第${drawnSoFar + 1}名: ${winner}`;
         winnersList.appendChild(li);
 
         // 粒子掉落
@@ -114,27 +117,8 @@ startBtn.addEventListener("click", async () => {
       console.error("next 错误:", e);
       alert("抽奖失败！");
     }
-  }, 3000); // 3秒滚动
+  }, speed);
 });
-
-
-// 显示中奖动画
-function showWinner(winner) {
-  rollingId.textContent = winner;
-  rollingId.style.transform = "scale(2)";
-  rollingId.style.color = "gold";
-
-  setTimeout(() => {
-    rollingId.style.transform = "scale(1)";
-    rollingId.style.color = "#ffd700";
-
-    const li = document.createElement("li");
-    li.textContent = winner;
-    winnersList.appendChild(li);
-
-    spawnFallingItems();
-  }, 1000);
-}
 
 // 粒子掉落
 function spawnFallingItems() {
