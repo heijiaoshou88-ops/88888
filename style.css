@@ -63,7 +63,7 @@ body {
   text-align: center;
 }
 
-/* Banner 文字效果（对应后端设置） */
+/* Banner 文字效果 */
 .浮雕 { text-shadow: 2px 2px 5px gray; }
 .发光 { text-shadow: 0 0 15px yellow, 0 0 25px orange; }
 .描边 { -webkit-text-stroke: 2px black; color: white; }
