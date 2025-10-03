@@ -1,40 +1,36 @@
 body {
   margin: 0;
   font-family: "Microsoft YaHei", sans-serif;
-  background: linear-gradient(180deg, #222, #111);
+  background: url("img/bg_start.jpg") no-repeat center center fixed;
+  background-size: cover;
   color: #fff;
   text-align: center;
   overflow-x: hidden;
 }
 
 .settings {
-  padding: 20px;
-  background: #333;
-  border-bottom: 2px solid #555;
-}
-
-.settings label {
-  display: block;
-  margin-top: 10px;
+  padding: 15px;
+  background: rgba(0,0,0,0.6);
+  border-bottom: 2px solid #444;
 }
 
 .settings textarea,
 .settings input,
 .settings select {
   width: 90%;
-  margin-top: 5px;
+  margin: 5px 0;
   padding: 8px;
   border-radius: 6px;
   border: none;
 }
 
 .settings button {
-  margin-top: 15px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
+  margin-top: 10px;
+  padding: 8px 16px;
   background: gold;
-  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -46,49 +42,69 @@ body {
 /* 文字特效 */
 .glow { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffae00; }
 .emboss { text-shadow: 1px 1px 2px #000, -1px -1px 2px #fff; }
-.shadow { text-shadow: 2px 2px 5px #000; }
+.shadow { text-shadow: 2px 2px 6px #000; }
 
-.slot-machine {
+.slot-frame {
+  position: relative;
+  width: 300px;
   margin: 20px auto;
-  width: 200px;
-  height: 120px;
-  border: 4px solid #ffd700;
-  border-radius: 15px;
-  background: #000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.slot-frame .frame {
+  width: 100%;
 }
 
 .slot-window {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   font-size: 2rem;
   color: #ffd700;
 }
 
-#startBtn {
+.buttons {
   margin: 15px;
-  padding: 12px 30px;
-  border-radius: 10px;
-  border: none;
-  background: crimson;
-  color: #fff;
-  font-size: 18px;
+}
+
+.btn {
+  width: 100px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+.speed-buttons {
+  margin: 10px;
+}
+
+.speed-btn {
+  width: 60px;
+  margin: 0 5px;
   cursor: pointer;
 }
 
 .winners-box {
+  position: relative;
+  width: 320px;
   margin: 20px auto;
-  padding: 10px;
-  width: 80%;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
+}
+
+.winners-box .winners-bg {
+  width: 100%;
 }
 
 .winners-box ul {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 80%;
   font-size: 18px;
+  color: #fff;
+  text-align: left;
 }
 
 /* 掉落物体 */
