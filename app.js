@@ -1,5 +1,5 @@
 // ================= API 地址 =================
-const API_URL = "https://mylottery.loophole.site/api/draw/prepare";
+const API_URL = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare";
 
 // ================= 全局变量 =================
 let winners = [];
