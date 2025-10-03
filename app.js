@@ -64,11 +64,14 @@ startBtn.addEventListener("click", async () => {
     return;
   }
 
+  // 老虎机随机滚动 3s
   rollingId.textContent = "转动中...";
   let rollTimer = setInterval(() => {
-    rollingId.textContent = Math.floor(Math.random() * 9999);
+    const rand = Math.floor(Math.random() * 999999);
+    rollingId.textContent = rand;
   }, 100);
 
+  // 3秒后停止滚动，去后端拿结果
   setTimeout(async () => {
     clearInterval(rollTimer);
     try {
@@ -80,20 +83,40 @@ startBtn.addEventListener("click", async () => {
       const data = await res.json();
       console.log("next 返回：", data);
 
-      if (!data.winner) {
+      const winner = data.winner;
+      if (!winner) {
         alert("⚠️ 后端没有返回 winner！");
         return;
       }
 
-      const winner = data.winner;
-      showWinner(winner);
-      drawnSoFar++;
+      // 中奖动画：放大闪烁 → 缩小进入 winners_box
+      rollingId.textContent = winner;
+      rollingId.style.transition = "all 0.5s ease";
+      rollingId.style.transform = "scale(2)";
+      rollingId.style.color = "gold";
+
+      setTimeout(() => {
+        rollingId.style.transform = "scale(1)";
+        rollingId.style.color = "#ffd700";
+
+        // 移动到 winners_box
+        const li = document.createElement("li");
+        li.textContent = `${drawnSoFar + 1}号: ${winner}`;
+        winnersList.appendChild(li);
+
+        // 粒子掉落
+        spawnFallingItems();
+
+        drawnSoFar++;
+      }, 1000);
+
     } catch (e) {
       console.error("next 错误:", e);
       alert("抽奖失败！");
     }
-  }, speed);
+  }, 3000); // 3秒滚动
 });
+
 
 // 显示中奖动画
 function showWinner(winner) {
