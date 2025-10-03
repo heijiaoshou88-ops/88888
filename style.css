@@ -1,8 +1,9 @@
 body {
-  font-family: Arial, sans-serif;
-  text-align: center;
   margin: 0;
   padding: 0;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  overflow: hidden;
 }
 
 .screen {
@@ -10,44 +11,63 @@ body {
   height: 100vh;
   background-size: cover;
   background-position: center;
-  padding: 20px;
-  box-sizing: border-box;
+  position: relative;
 }
 
 #start-screen {
-  background-image: url("img/bg_start.png");
+  background-image: url("img/bg_start.jpg");
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 #draw-screen {
-  background-image: url("img/bg_draw.png");
+  background-image: url("img/bg_draw.jpg");
 }
 
 .hidden { display: none; }
 
-/* ========== Banner 样式 ========== */
-#banner-text {
-  position: absolute;
-  top: 7%;          /* 距离顶部 7% */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  font-size: 32px;
-  font-weight: bold;
-  text-align: center;
-  color: white;
+.panel {
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  border-radius: 12px;
+  color: #fff;
+  width: 80%;
+  max-width: 500px;
 }
 
-/* 字体效果 */
-.浮雕 { text-shadow: 2px 2px 5px gray; }
-.发光 { text-shadow: 0 0 12px yellow; }
-.描边 { -webkit-text-stroke: 1px black; color: white; }
-.霓虹 { text-shadow: 0 0 8px #0ff, 0 0 15px #0ff; }
+.panel label {
+  display: block;
+  margin: 10px 0 5px;
+  font-weight: bold;
+}
+
+.panel select,
+.panel textarea {
+  width: 100%;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-bottom: 12px;
+}
+
+#banner-text {
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+  font-size: 36px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 0 12px gold, 0 0 20px red;
+}
 
 #slot-machine {
   position: relative;
-  width: 300px;
-  height: 150px;
-  margin: 120px auto 20px; /* 留出上方空间给 banner */
+  width: 400px;
+  height: 200px;
+  margin: 120px auto 20px;
 }
 .slot-frame {
   width: 100%;
@@ -59,20 +79,24 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
+  font-size: 28px;
   font-weight: bold;
   color: red;
   background: rgba(255,255,255,0.7);
-  padding: 5px 10px;
+  padding: 5px 15px;
   border-radius: 8px;
 }
 
 #winners-list {
   margin: 20px auto;
-  width: 90%;
+  width: 600px;
+  height: 300px;
   position: relative;
 }
-.winners-box { width: 100%; height: auto; }
+.winners-box {
+  width: 100%;
+  height: auto;
+}
 #winners-ul {
   position: absolute;
   top: 20%;
@@ -83,33 +107,47 @@ body {
   padding: 0;
   margin: 0;
   text-align: left;
-  font-size: 16px;
+  font-size: 18px;
+  color: black;
   overflow-y: auto;
 }
 
 .img-btn {
-  width: 80px;
-  height: 40px;
-  margin: 5px;
+  width: 200px;
+  height: 100px;
   background-size: cover;
+  background-position: center;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s, filter 0.2s;
 }
 .img-btn:hover {
-  filter: drop-shadow(0 0 6px rgba(255,215,0,0.8));
+  filter: drop-shadow(0 0 8px rgba(255,215,0,0.9));
 }
 .img-btn:active {
   transform: scale(0.9);
-  filter: drop-shadow(0 0 10px rgba(255,255,0,1));
 }
+
+/* 按钮贴图 */
+.start-btn { background-image: url("img/start_btn.png"); }
+.copy-btn { background-image: url("img/copy_btn.png"); }
+.back-btn { background-image: url("img/back_btn.png"); }
+
+.speed-btn {
+  width: 120px;
+  height: 60px;
+}
+.s1 { background-image: url("img/speed1.png"); }
+.s2 { background-image: url("img/speed2.png"); }
+.s5 { background-image: url("img/speed5.png"); }
+.s10 { background-image: url("img/speed10.png"); }
 
 .buttons {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 #confetti {
