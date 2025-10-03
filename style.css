@@ -1,148 +1,112 @@
 body {
   margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
+  font-family: "Microsoft YaHei", sans-serif;
+  background: linear-gradient(180deg, #222, #111);
+  color: #fff;
   text-align: center;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
-.screen {
-  width: 100%;
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  position: relative;
-}
-
-#start-screen {
-  background-image: url("img/bg_start.jpg");
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#draw-screen {
-  background-image: url("img/bg_draw.jpg");
-}
-
-.hidden { display: none; }
-
-.panel {
-  background: rgba(0,0,0,0.6);
+.settings {
   padding: 20px;
-  border-radius: 12px;
-  color: #fff;
-  width: 80%;
-  max-width: 500px;
+  background: #333;
+  border-bottom: 2px solid #555;
 }
 
-.panel label {
+.settings label {
   display: block;
-  margin: 10px 0 5px;
-  font-weight: bold;
+  margin-top: 10px;
 }
 
-.panel select,
-.panel textarea {
-  width: 100%;
-  padding: 6px;
+.settings textarea,
+.settings input,
+.settings select {
+  width: 90%;
+  margin-top: 5px;
+  padding: 8px;
   border-radius: 6px;
-  border: 1px solid #ccc;
-  margin-bottom: 12px;
+  border: none;
 }
 
-#banner-text {
-  position: absolute;
-  top: 5%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80%;
-  font-size: 36px;
-  font-weight: bold;
-  color: #fff;
-  text-align: center;
-}
-
-/* 老虎机 */
-#slot-machine {
-  position: relative;
-  width: 400px;
-  height: 200px;
-  margin: 120px auto 20px;
-}
-.slot-frame {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-#slot-display {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 32px;
-  font-weight: bold;
-  color: red;
-  background: rgba(255,255,255,0.8);
+.settings button {
+  margin-top: 15px;
   padding: 10px 20px;
-  border-radius: 12px;
-  transition: transform 0.5s ease, text-shadow 0.5s ease;
-}
-#slot-display.enlarged {
-  transform: translate(-50%, -50%) scale(2);
-  text-shadow: 0 0 20px gold, 0 0 30px orange;
+  border: none;
+  border-radius: 8px;
+  background: gold;
+  font-size: 16px;
+  cursor: pointer;
 }
 
-/* 中奖名单 */
-#winners-list {
+.banner {
+  margin: 20px 0;
+  font-size: 2rem;
+}
+
+/* 文字特效 */
+.glow { text-shadow: 0 0 10px #ffd700, 0 0 20px #ffae00; }
+.emboss { text-shadow: 1px 1px 2px #000, -1px -1px 2px #fff; }
+.shadow { text-shadow: 2px 2px 5px #000; }
+
+.slot-machine {
   margin: 20px auto;
-  width: 600px;
-  height: 300px;
-  position: relative;
+  width: 200px;
+  height: 120px;
+  border: 4px solid #ffd700;
+  border-radius: 15px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.slot-window {
+  font-size: 2rem;
+  color: #ffd700;
+}
+
+#startBtn {
+  margin: 15px;
+  padding: 12px 30px;
+  border-radius: 10px;
+  border: none;
+  background: crimson;
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
 .winners-box {
-  width: 100%;
-  height: auto;
+  margin: 20px auto;
+  padding: 10px;
+  width: 80%;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
 }
-#winners-ul {
-  position: absolute;
-  top: 20%;
-  left: 10%;
-  right: 10%;
-  bottom: 10%;
+
+.winners-box ul {
   list-style: none;
   padding: 0;
   margin: 0;
-  text-align: left;
   font-size: 18px;
-  color: black;
-  overflow-y: auto;
 }
 
-/* 按钮 */
-.img-btn {
-  width: 200px;
-  height: 100px;
-  background-size: cover;
-  background-position: center;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s, filter 0.2s;
-}
-.img-btn:hover {
-  filter: drop-shadow(0 0 8px rgba(255,215,0,0.9));
-}
-.img-btn:active {
-  transform: scale(0.9);
-}
-.start-btn { background-image: url("img/start_btn.png"); }
-
-/* 粒子 */
-#confetti {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+/* 掉落物体 */
+.falling {
+  position: fixed;
+  top: -50px;
   pointer-events: none;
+  z-index: 999;
+  width: 40px;
+  height: 40px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(120vh) rotate(360deg);
+    opacity: 0;
+  }
 }
