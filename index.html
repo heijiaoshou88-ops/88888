@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>抽奖系统</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- ======= 设置页面 ======= -->
+  <!-- ========== 设置界面 ========== -->
   <div id="start-screen" class="screen">
     <div class="panel">
-      <label for="winner-count">选择中奖人数：</label>
+      <label for="winner-count">选择中奖人数:</label>
       <select id="winner-count">
         <option value="1">1</option>
         <option value="2">2</option>
@@ -17,51 +18,29 @@
         <option value="5">5</option>
       </select>
 
-      <label for="speed-select">动画速度：</label>
-      <select id="speed-select">
-        <option value="1x">1x</option>
-        <option value="2x">2x</option>
-        <option value="5x">5x</option>
-        <option value="10x">10x</option>
-      </select>
-
-      <label for="participants">参赛 ID (每行一个)：</label>
+      <label for="participants">参赛 ID (每行一个):</label>
       <textarea id="participants" rows="6"></textarea>
 
       <button id="start-btn" class="img-btn start-btn"></button>
     </div>
   </div>
 
-  <!-- ======= 抽奖页面 ======= -->
+  <!-- ========== 抽奖界面 ========== -->
   <div id="draw-screen" class="screen hidden">
-    <!-- 顶部 Banner 文字 -->
     <div id="banner-text"></div>
 
-    <!-- 老虎机框 -->
     <div id="slot-machine">
       <img src="img/slot_frame.png" class="slot-frame" />
-      <div id="slot-display">等待抽奖…</div>
+      <div id="slot-display">等待结果...</div>
     </div>
 
-    <!-- 中奖名单框 -->
     <div id="winners-list">
       <img src="img/winners_box.png" class="winners-box" />
       <ul id="winners-ul"></ul>
     </div>
 
-    <!-- 操作按钮 -->
-    <div class="buttons">
-      <button id="copy-btn" class="img-btn copy-btn"></button>
-      <button id="back-btn" class="img-btn back-btn"></button>
-      <button id="speed-1" class="img-btn speed-btn s1"></button>
-      <button id="speed-2" class="img-btn speed-btn s2"></button>
-      <button id="speed-5" class="img-btn speed-btn s5"></button>
-      <button id="speed-10" class="img-btn speed-btn s10"></button>
-    </div>
+    <canvas id="confetti"></canvas>
   </div>
-
-  <!-- 粒子特效 Canvas -->
-  <canvas id="confetti"></canvas>
 
   <script src="app.js"></script>
 </body>
