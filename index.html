@@ -1,57 +1,51 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>抽奖系统</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽奖机</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- ====== 设置页面 ====== -->
-  <div id="start-screen" class="screen">
-    <div class="panel">
-      <label>选择中奖人数:</label>
-      <select id="winner-count">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="5">5</option>
-      </select>
+  <!-- 抽奖设置区 -->
+  <div class="settings">
+    <h2>抽奖设置</h2>
+    <label>候选ID（每行一个）：</label>
+    <textarea id="idsInput" placeholder="输入参与抽奖的ID"></textarea>
 
-      <label>动画速度:</label>
-      <select id="speed-select">
-        <option value="1">1x</option>
-        <option value="2">2x</option>
-        <option value="5">5x</option>
-        <option value="10">10x</option>
-      </select>
+    <label>中奖人数：</label>
+    <input type="number" id="winnersCount" value="1" min="1">
 
-      <label>参赛 ID (每行一个):</label>
-      <textarea id="participants" rows="6"></textarea>
+    <label>Banner文字：</label>
+    <input type="text" id="bannerText" placeholder="例如：XXX直播间">
 
-      <button id="start-btn" class="img-btn start-btn"></button>
+    <label>文字效果：</label>
+    <select id="fontStyle">
+      <option value="glow">发光</option>
+      <option value="emboss">浮雕</option>
+      <option value="shadow">描边阴影</option>
+    </select>
+
+    <button id="prepareBtn">提交设置</button>
+  </div>
+
+  <!-- 抽奖显示区 -->
+  <div class="lottery">
+    <h1 id="banner" class="banner">抽奖机</h1>
+    <div id="slotMachine" class="slot-machine">
+      <div class="slot-window">
+        <span id="rollingId">---</span>
+      </div>
+    </div>
+    <button id="startBtn" disabled>开始抽奖</button>
+    <div class="winners-box">
+      <h3>中奖名单</h3>
+      <ul id="winnersList"></ul>
     </div>
   </div>
 
-  <!-- ====== 抽奖页面 ====== -->
-  <div id="draw-screen" class="screen hidden">
-    <!-- 顶部 Banner -->
-    <div id="banner-text"></div>
-
-    <!-- 老虎机 -->
-    <div id="slot-machine">
-      <img src="img/slot_frame.png" class="slot-frame" />
-      <div id="slot-display">准备中...</div>
-    </div>
-
-    <!-- 中奖名单 -->
-    <div id="winners-list">
-      <img src="img/winners_box.png" class="winners-box" />
-      <ul id="winners-ul"></ul>
-    </div>
-
-    <!-- 粒子层 -->
-    <canvas id="confetti"></canvas>
-  </div>
+  <!-- 掉落容器 -->
+  <div id="fallingContainer"></div>
 
   <script src="app.js"></script>
 </body>
