@@ -30,7 +30,7 @@ prepareBtn.addEventListener("click", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ids: ids,
+        participants: ids,   // ← 必须叫 participants
         winners_count: count,
         banner_text: banner,
         font_style: fontStyle
