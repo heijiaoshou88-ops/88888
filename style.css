@@ -60,8 +60,14 @@ body {
   font-size: 36px;
   font-weight: bold;
   color: #fff;
-  text-shadow: 0 0 12px gold, 0 0 20px red;
+  text-align: center;
 }
+
+/* Banner 文字效果（对应后端设置） */
+.浮雕 { text-shadow: 2px 2px 5px gray; }
+.发光 { text-shadow: 0 0 15px yellow, 0 0 25px orange; }
+.描边 { -webkit-text-stroke: 2px black; color: white; }
+.霓虹 { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff; }
 
 #slot-machine {
   position: relative;
@@ -79,12 +85,17 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 28px;
+  font-size: 32px;
   font-weight: bold;
   color: red;
-  background: rgba(255,255,255,0.7);
-  padding: 5px 15px;
-  border-radius: 8px;
+  background: rgba(255,255,255,0.8);
+  padding: 10px 20px;
+  border-radius: 12px;
+  transition: transform 0.5s ease, text-shadow 0.5s ease;
+}
+#slot-display.enlarged {
+  transform: translate(-50%, -50%) scale(2);
+  text-shadow: 0 0 20px gold, 0 0 30px orange;
 }
 
 #winners-list {

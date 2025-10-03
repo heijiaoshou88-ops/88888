@@ -40,12 +40,30 @@ function parseParticipants(text) {
   return text.split(/[\n,;，；]+/).map(s => s.trim()).filter(Boolean);
 }
 
-// ================= 粒子掉落 =================
+// ================= 老虎机滚动逻辑 =================
+function spinSlotForSeconds(seconds, finalId, allIds) {
+  return new Promise(resolve => {
+    let counter = 0;
+    const interval = setInterval(() => {
+      const fake = allIds[Math.floor(Math.random() * allIds.length)];
+      slotDisplay.innerText = fake;
+      counter++;
+    }, 80 / playbackSpeed);
+
+    setTimeout(() => {
+      clearInterval(interval);
+      slotDisplay.innerText = finalId;
+      resolve();
+    }, seconds * 1000);
+  });
+}
+
+// ================= 粒子掉落动画 =================
 function launchConfetti() {
   let particles = [];
+  const count = 30 + Math.floor(Math.random() * 30); // 30~60 粒子
 
-  // 随机生成 40 个粒子
-  for (let i = 0; i < 40; i++) {
+  for (let i = 0; i < count; i++) {
     let choice = Math.random();
     let img;
     if (choice < 0.3) img = coinImgs[Math.floor(Math.random() * coinImgs.length)];
@@ -66,46 +84,52 @@ function launchConfetti() {
 
   function drawFrame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     particles.forEach(p => {
       ctx.save();
       ctx.translate(p.x, p.y);
       ctx.rotate((p.rotation * Math.PI) / 180);
       ctx.drawImage(p.img, -p.size / 2, -p.size / 2, p.size, p.size);
       ctx.restore();
-
       p.y += p.speedY;
       p.x += p.speedX;
       p.rotation += p.rotationSpeed;
     });
-
     particles = particles.filter(p => p.y < canvas.height + 50);
-
-    if (particles.length > 0) {
-      requestAnimationFrame(drawFrame);
-    }
+    if (particles.length > 0) requestAnimationFrame(drawFrame);
   }
-
   drawFrame();
 }
 
-// ================= 老虎机动画 =================
-async function playSlotAnimation(finalText) {
-  const frames = ["▦▦▦", "▧▧▧", "▨▨▨", "▩▩▩", "▥▥▥", "▤▤▤"];
-  const tick = Math.max(35 / playbackSpeed, 8);
-  let t = 0, loopMs = 800 / playbackSpeed;
-  const start = performance.now();
+// ================= 抽奖动画流程 =================
+async function playDraw(participants) {
+  winnersUl.innerHTML = "";
 
-  return new Promise(resolve => {
-    const id = setInterval(() => {
-      slotDisplay.textContent = frames[t++ % frames.length];
-      if (performance.now() - start >= loopMs) {
-        clearInterval(id);
-        slotDisplay.textContent = String(finalText);
-        resolve();
-      }
-    }, tick);
-  });
+  for (let i = 0; i < winners.length; i++) {
+    const winner = winners[i];
+
+    // 转动 3 秒
+    await spinSlotForSeconds(3, winner, participants);
+
+    // 放大中奖 ID
+    slotDisplay.style.transition = "transform 0.5s ease";
+    slotDisplay.style.transform = "scale(2)";
+    await new Promise(r => setTimeout(r, 600));
+
+    // 粒子雨
+    launchConfetti();
+
+    // 缩小回原来大小
+    slotDisplay.style.transform = "scale(1)";
+    await new Promise(r => setTimeout(r, 500));
+
+    // 添加到中奖名单框
+    const li = document.createElement("li");
+    li.textContent = `${i + 1}. ${winner}`;
+    winnersUl.appendChild(li);
+
+    // 等待片刻再下一轮
+    await new Promise(r => setTimeout(r, 800));
+  }
 }
 
 // ================= 主流程 =================
@@ -138,23 +162,17 @@ async function onStartButtonClicked() {
     const data = result.data;
     winners = data.winners || [];
 
-    // 切到抽奖界面
+    // 切换到抽奖界面
     startScreen.classList.add("hidden");
     drawScreen.classList.remove("hidden");
 
     // 设置 banner
     bannerText.innerText = data.banner || "";
-    if (data.font_style) bannerText.className = data.font_style;
+    bannerText.className = "";
+    if (data.font_style) bannerText.classList.add(data.font_style);
 
-    // 播放动画
-    winnersUl.innerHTML = "";
-    for (let i = 0; i < winners.length; i++) {
-      await playSlotAnimation(winners[i]);
-      const li = document.createElement("li");
-      li.textContent = `${i + 1}. ${winners[i]}`;
-      winnersUl.appendChild(li);
-      launchConfetti();
-    }
+    // 播放抽奖动画
+    await playDraw(participants);
 
     // 回传 Telegram WebApp
     if (window.Telegram && Telegram.WebApp) {
