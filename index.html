@@ -1,27 +1,25 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>炫酷抽奖 WebApp</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抽奖系统</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <!-- 启动界面 -->
+
+  <!-- ========== 启动界面 ========== -->
   <div id="start-screen" class="screen">
     <div class="panel">
-      <label>选择中奖人数：</label>
+      <label>选择中奖人数:</label>
       <select id="winner-count">
-        <option>1</option>
-        <option>5</option>
-        <option>10</option>
-        <option>15</option>
-        <option>20</option>
-        <option>50</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="5">5</option>
+        <option value="10">10</option>
       </select>
 
-      <label>动画速度：</label>
+      <label>动画速度:</label>
       <select id="speed-select">
         <option value="1">1x</option>
         <option value="2">2x</option>
@@ -29,39 +27,47 @@
         <option value="10">10x</option>
       </select>
 
-      <label>参赛 ID（每行一个）：</label>
+      <label>参赛 ID (每行一个):</label>
       <textarea id="participants" rows="6"></textarea>
 
-      <button id="start-btn" class="img-btn start-btn"></button>
+      <div style="margin-top:15px;">
+        <button id="start-btn" class="img-btn start-btn"></button>
+      </div>
     </div>
   </div>
 
-  <!-- 抽奖界面 -->
+  <!-- ========== 抽奖界面 ========== -->
   <div id="draw-screen" class="screen hidden">
-    <h2 id="banner-text"></h2>
+    <!-- 顶部 Banner -->
+    <div id="banner-text"></div>
 
+    <!-- 老虎机 -->
     <div id="slot-machine">
-      <img src="img/slot_frame.png" class="slot-frame" alt="老虎机框">
+      <img src="img/slot_frame.png" class="slot-frame" />
       <div id="slot-display">等待结果...</div>
     </div>
 
+    <!-- 中奖名单框 -->
     <div id="winners-list">
-      <img src="img/winners_box.png" class="winners-box" alt="中奖名单框">
+      <img src="img/winners_box.png" class="winners-box" />
       <ul id="winners-ul"></ul>
     </div>
 
+    <!-- 操作按钮区 -->
     <div class="buttons">
+      <button id="copy-btn" class="img-btn copy-btn"></button>
+      <button id="back-btn" class="img-btn back-btn"></button>
       <button id="speed-1" class="img-btn speed-btn s1"></button>
       <button id="speed-2" class="img-btn speed-btn s2"></button>
       <button id="speed-5" class="img-btn speed-btn s5"></button>
       <button id="speed-10" class="img-btn speed-btn s10"></button>
-      <button id="copy-btn" class="img-btn copy-btn"></button>
-      <button id="back-btn" class="img-btn back-btn"></button>
     </div>
 
+    <!-- 粒子特效画布 -->
     <canvas id="confetti"></canvas>
   </div>
 
+  <!-- ========== 脚本 ========== -->
   <script src="app.js"></script>
 </body>
 </html>
