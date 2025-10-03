@@ -1,4 +1,4 @@
-// 你的后端 Loophole 地址（不要写 /prepare 或 /next，直接写到 /draw）
+// 你的后端 Loophole 地址
 const API_BASE = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw";
 
 let drawId = null;
@@ -13,7 +13,7 @@ const winnersList = document.getElementById("winnersList");
 const bannerEl = document.getElementById("banner");
 const fallingContainer = document.getElementById("fallingContainer");
 
-// 准备设置
+// 提交设置
 prepareBtn.addEventListener("click", async () => {
   const ids = document.getElementById("idsInput").value.trim().split("\n").map(x => x.trim()).filter(Boolean);
   const count = parseInt(document.getElementById("winnersCount").value, 10);
@@ -30,34 +30,47 @@ prepareBtn.addEventListener("click", async () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        participants: ids,   // ← 必须叫 participants
+        participants: ids,   // ✅ 后端需要的是 participants
         winners_count: count,
         banner_text: banner,
         font_style: fontStyle
       })
     });
+
     const data = await res.json();
+    console.log("prepare 返回：", data);
+
+    // ✅ 保存 drawId
     drawId = data.draw_id;
+    console.log("drawId 已保存:", drawId);
+
     winnersCount = count;
     drawnSoFar = 0;
     winnersList.innerHTML = "";
+
     bannerEl.textContent = data.banner || banner || "抽奖机";
     bannerEl.className = "banner " + (data.font_style || fontStyle);
+
+    if (!drawId) {
+      alert("⚠️ 后端没有返回 draw_id，请检查返回 JSON！");
+      return;
+    }
+
     alert("设置完成，可以开始抽奖！");
   } catch (e) {
-    console.error(e);
+    console.error("prepare 错误:", e);
     alert("提交失败，请检查后端服务。");
   }
 });
 
-// 点击抽奖
+// 点击开始抽奖
 startBtn.addEventListener("click", async () => {
   if (!drawId) {
     alert("请先提交设置！");
     return;
   }
   if (drawnSoFar >= winnersCount) {
-    alert("抽奖结束！");
+    alert("抽奖已完成！");
     return;
   }
 
@@ -75,16 +88,25 @@ startBtn.addEventListener("click", async () => {
         body: JSON.stringify({ draw_id: drawId })
       });
       const data = await res.json();
+      console.log("next 返回：", data);
+
+      if (!data.winner) {
+        alert("⚠️ 后端没有返回 winner！");
+        return;
+      }
+
       const winner = data.winner;
       showWinner(winner);
+
       drawnSoFar++;
     } catch (e) {
-      console.error(e);
+      console.error("next 错误:", e);
       alert("抽奖失败！");
     }
   }, 3000);
 });
 
+// 显示中奖动画
 function showWinner(winner) {
   rollingId.textContent = winner;
   rollingId.style.transform = "scale(2)";
@@ -102,6 +124,7 @@ function showWinner(winner) {
   }, 1000);
 }
 
+// 掉落金币/钻石/金元宝
 function spawnFallingItems() {
   const items = [
     "img/coin1.png", "img/coin2.png", "img/coin3.png",
