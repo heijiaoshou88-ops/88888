@@ -38,7 +38,7 @@ body {
 }
 
 .start-btn {
-  width: 150px;
+  width: 650px;
   margin-top: 15px;
   cursor: pointer;
 }
@@ -88,7 +88,7 @@ body {
 
 .winners-box {
   position: relative;
-  width: 320px;
+  width: 420px;
   margin: 20px auto;
 }
 
