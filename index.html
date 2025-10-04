@@ -1,55 +1,49 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>抽奖机</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 开始页面 -->
-  <div id="startPage" class="page start-page" style="background-image:url('img/bg_start.jpg')">
-    <div class="start-container">
-      <textarea id="idsInput" placeholder="输入候选ID，每行一个"></textarea>
-      <input type="number" id="winnersCount" placeholder="中奖人数" min="1">
-      <img id="goDrawBtn" src="img/bg_start.png" class="start-btn" alt="开始抽奖">
+  <!-- 开始页 -->
+  <div id="startPage" class="page" style="background-image: url('img/bg_start.jpg')">
+    <div class="form">
+      <h2>抽奖设置</h2>
+      <textarea id="participantsInput" placeholder="输入参与ID，每行一个"></textarea>
+      <input id="winnersCount" type="number" placeholder="中奖人数">
+      <button id="prepareBtn">
+        <img src="img/bg_start.png" alt="开始按钮">
+      </button>
     </div>
   </div>
 
-  <!-- 抽奖页面 -->
-  <div id="drawPage" class="page draw-page hidden" style="background-image:url('img/bg_draw.jpg')">
-    <div class="lottery">
-      <!-- 老虎机 -->
-      <div class="slot-frame">
-        <img src="img/slot_frame.png" class="frame" alt="slot frame">
-        <div class="slot-window">
-          <span id="rollingId">---</span>
-        </div>
-      </div>
-
-      <!-- 按钮区 -->
-      <div class="buttons">
-        <img id="startBtn" src="img/start_btn.png" class="btn" alt="开始">
-        <img id="copyBtn" src="img/copy_btn.png" class="btn" alt="复制">
-      </div>
-
-      <div class="speed-buttons">
-        <img src="img/speed1.png" class="speed-btn" data-speed="1">
-        <img src="img/speed2.png" class="speed-btn" data-speed="2">
-        <img src="img/speed5.png" class="speed-btn" data-speed="5">
-        <img src="img/speed10.png" class="speed-btn" data-speed="10">
-      </div>
-
-      <!-- 中奖名单 -->
-      <div class="winners-box">
-        <img src="img/winners_box.png" class="winners-bg" alt="winners">
-        <ul id="winnersList"></ul>
+  <!-- 抽奖页 -->
+  <div id="drawPage" class="page" style="display:none; background-image: url('img/bg_draw.jpg')">
+    <div class="slot-frame">
+      <img src="img/slot_frame.png" class="frame" alt="老虎机框架">
+      <div class="slot-window">
+        <ul id="slotList"></ul>
       </div>
     </div>
-  </div>
 
-  <!-- 粒子容器 -->
-  <div id="fallingContainer"></div>
+    <div class="controls">
+      <button id="startBtn"><img src="img/start_btn.png" alt="开始抽奖"></button>
+      <button id="copyBtn"><img src="img/copy_btn.png" alt="复制"></button>
+    </div>
+
+    <div class="speed">
+      <img src="img/speed1.png" class="speedBtn" data-speed="1">
+      <img src="img/speed2.png" class="speedBtn" data-speed="2">
+      <img src="img/speed5.png" class="speedBtn" data-speed="5">
+      <img src="img/speed10.png" class="speedBtn" data-speed="10">
+    </div>
+
+    <div class="winners-box">
+      <img src="img/winners_box.png" class="winners-frame" alt="中奖框">
+      <ul id="winnersList"></ul>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
