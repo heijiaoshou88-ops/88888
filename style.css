@@ -10,7 +10,7 @@
 *{ box-sizing: border-box; }
 html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial; overflow:hidden; }
 .page{
-  position:fixed; inset:0;                   /* 全屏，不占文档高度，避免两页叠加 */
+  position:fixed; inset:0;                   /* 全屏，不占文档高度 */
   background-size:cover; background-position:center;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
 }
@@ -34,53 +34,83 @@ html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial;
 .img-btn{ border:0; background:transparent; padding:0; cursor:pointer }
 .img-btn img{ width:180px; display:block }
 
-/* 老虎机整体放大2倍，不改文档流位置 */
+/* 老虎机整体放大2倍，不改文档流位置
+   ↑ 增加 margin-bottom，避免与按钮重叠 */
 .slot-scale{
   transform: scale(2);
   transform-origin: top center;
-  margin-top: 4px; margin-bottom: 18px;     /* 与按钮留间距 */
+  margin-top: 4px;
+  margin-bottom: 32px;   /* 原 18px → 32px，解决按钮压窗 */
 }
 .slot-wrap{ position:relative; width: var(--slot-base-width); margin:0 auto; }
 .slot-frame{ width:100%; display:block; }
 
-/* 1列5行窗口 */
+/* 1列5行窗口（加强裁切，杜绝外泄） */
 .slot-window{
   position:absolute; left:50%; transform: translateX(-50%);
   top: 58px; width: 130px; height: calc(var(--row-h) * 5);
-  overflow: hidden; z-index:1;
+  overflow: hidden;
+  z-index:2;
+  clip-path: inset(0);     /* 额外防线：有些设备上 transform 子元素可能“露头” */
+  contain: paint;          /* 独立绘制层，减少溢绘 */
 }
 #slotList{
   list-style:none; margin:0; padding:0;
   position:relative; z-index:1;
+  will-change: transform;
   transition: transform 3s cubic-bezier(.15,.85,.25,1);
 }
 #slotList li{
   height: var(--row-h); line-height: var(--row-h);
-  text-align:center; font-size:18px; color:#fff; text-shadow:0 1px 2px #000;
+  text-align:center;
+  font-size:18px;
+  color:#fff;
+  letter-spacing: .5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.9);
 }
+
+/* 高亮：改为纯 scale，不再加字重字号，避免被外层 scale(2)放大过头 */
 #slotList li.highlight{
-  color:#ffd700; font-size:22px; font-weight:700;
-  animation: pulse .8s ease-in-out 2;
+  color:#ffd700;
+  font-weight:700;
+  animation: pulseScale .9s ease-in-out 2;
 }
-@keyframes pulse{
-  0%{ transform:scale(1) } 50%{ transform:scale(1.2) } 100%{ transform:scale(1) }
+@keyframes pulseScale{
+  0%{ transform:scale(1) }
+  50%{ transform:scale(1.15) }
+  100%{ transform:scale(1) }
 }
 
 /* 顶/底淡入淡出遮罩 */
 .fade-mask{
-  position:absolute; left:0; width:100%; height:36px; pointer-events:none; z-index:2;
+  position:absolute; left:0; width:100%; height:36px; pointer-events:none; z-index:3;
   background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));
 }
 .fade-mask.bottom{ bottom:0; top:auto; transform: rotate(180deg); }
 .fade-mask.top{ top:0; }
 
-/* 控件 */
-.controls{ margin: 6px 0 8px; display:flex; gap:16px; align-items:center; z-index:3; }
+/* 控件：整体下移，避免与老虎机重叠；层级低于遮罩 */
+.controls{
+  margin: 10px 0 10px;         /* 原 6/8 → 10/10，进一步下移 */
+  display:flex; gap:16px; align-items:center;
+  z-index:1;
+}
 .controls .img-btn img{ width:120px; }
-.speed{ display:flex; gap:8px; margin-bottom:8px; z-index:3; }
-.speed img{ width:60px; cursor:pointer; user-select:none }
 
-/* 中奖框放大1.5倍，固定右下 */
+/* 倍速：增加选中态（active） */
+.speed{ display:flex; gap:8px; margin-bottom:8px; z-index:1; }
+.speed img{
+  width:60px; cursor:pointer; user-select:none;
+  opacity:.85; transition: transform .15s ease, opacity .15s ease, filter .15s ease;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+}
+.speed img.active{
+  transform: translateY(-2px) scale(1.05);
+  opacity:1;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.45));
+}
+
+/* 中奖框放大1.5倍，固定右下；加滚动避免过多项目溢出 */
 .winners-scale{
   position:absolute; right:36px; bottom:24px;
   transform: scale(1.5); transform-origin: bottom right;
@@ -90,12 +120,18 @@ html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial;
 #winnersList{
   position:absolute; left:50%; transform:translateX(-50%);
   top:30px; width:76%;
-  list-style:none; margin:0; padding:0;
-  color:#ffe38a; text-shadow:0 1px 2px #000; font-size:16px;
+  max-height: 120px;               /* 大约 6 行 */
+  overflow: auto;
+  list-style:none; margin:0; padding:0 4px;
+  color:#ffe38a;
+  text-shadow:0 1px 2px #000;
+  font-size:16px; line-height:22px;
 }
 
-/* 粒子 */
+/* 粒子（大小随机更自然） */
 .particle{
-  position: fixed; top:-50px; left:0; width:34px; height:34px; object-fit:contain;
-  pointer-events:none; z-index:999; opacity:1; transition: transform 3s linear, opacity 3s;
+  position: fixed; top:-50px; left:0;
+  width:34px; height:34px; object-fit:contain;
+  pointer-events:none; z-index:999; opacity:1;
+  transition: transform 3s linear, opacity 3s;
 }
