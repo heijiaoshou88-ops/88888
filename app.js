@@ -1,5 +1,4 @@
-const API_URL = "https://api88888.heijiaoshou88.workers.dev/api/draw/prepare";
-
+const API_URL = "http://777707777.com:24680/api/draw/prepare";
 let participants = [];
 let winnersQueue = [];
 let drawId = null;
