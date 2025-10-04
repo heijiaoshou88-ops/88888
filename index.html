@@ -8,7 +8,7 @@
 </head>
 <body>
   <!-- 开始页 -->
-  <section id="startPage" class="page" style="background-image:url('img/bg_start.jpg')">
+  <section id="startPage" class="page" style="background-image:url('img/bg_start.jpg'); display:flex;">
     <div class="start-card">
       <h2>抽奖设置</h2>
       <textarea id="participantsInput" placeholder="输入参与ID，每行一个"></textarea>
@@ -19,8 +19,8 @@
     </div>
   </section>
 
-  <!-- 抽奖页 -->
-  <section id="drawPage" class="page hidden" style="background-image:url('img/bg_draw.jpg')">
+  <!-- 抽奖页（初始隐藏） -->
+  <section id="drawPage" class="page" style="background-image:url('img/bg_draw.jpg'); display:none;">
     <!-- 老虎机（放大2倍） -->
     <div class="slot-scale">
       <div class="slot-wrap">
@@ -47,7 +47,7 @@
       <img src="img/speed10.png" class="speed-btn" data-speed="10" alt="10x" />
     </div>
 
-    <!-- 中奖框（放大1.5倍） -->
+    <!-- 中奖框（放大1.5倍，右下角） -->
     <div class="winners-scale">
       <div class="winners-wrap">
         <img src="img/winners_box.png" class="winners-frame" alt="winners" />
