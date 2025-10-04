@@ -37,11 +37,8 @@ html,body{ margin:0; height:100%; font-family: "Microsoft YaHei", system-ui, -ap
 .img-btn img{ width: 180px; display:block }
 
 /* 老虎机区域（整体放大2倍且不跑位） */
-.slot-scale{
-  transform: scale(2);
-  transform-origin: top center;
-  margin-top: 12px;
-}
+.slot-scale   { margin-top: 6px; margin-bottom: 20px; } /* 老虎机整体与按钮间距 */
+.controls     { margin: 12px 0 8px; }                   /* 控件区上下间距 */
 .slot-wrap{
   position: relative;
   width: var(--slot-base-width);
@@ -118,3 +115,7 @@ html,body{ margin:0; height:100%; font-family: "Microsoft YaHei", system-ui, -ap
   pointer-events: none; z-index: 999;
   opacity: 1; transition: transform 3s linear, opacity 3s;
 }
+/* 放到 style.css 末尾或相关段落就行 */
+.slot-window { position: absolute; z-index: 1; }  /* 号码层 */
+#slotList     { position: relative; z-index: 1; } /* 号码层 */
+.fade-mask    { z-index: 2; }                     /* 顶/底遮罩在上 */
