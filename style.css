@@ -1,131 +1,105 @@
-body {
+body, html {
   margin: 0;
-  font-family: "Microsoft YaHei", sans-serif;
-  color: #fff;
-  overflow-x: hidden;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-size: cover;
+  background-position: center;
+  height: 100%;
+  overflow: hidden;
 }
 
 .page {
-  position: absolute;
-  top:0;left:0;right:0;bottom:0;
+  width: 100%;
+  height: 100vh;
   background-size: cover;
   background-position: center;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: opacity 1s;
 }
 
-.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.start-container {
-  text-align: center;
-  background: rgba(0,0,0,0.5);
+.form {
+  background: rgba(255,255,255,0.85);
   padding: 20px;
   border-radius: 12px;
 }
 
-.start-container textarea,
-.start-container input {
+textarea, input {
   width: 250px;
   margin: 10px 0;
   padding: 8px;
-  border-radius: 6px;
-  border: none;
+  font-size: 16px;
 }
 
-.start-btn {
-  width: 650px;
-  margin-top: 15px;
+button img {
+  width: 180px;
   cursor: pointer;
-}
-
-.lottery {
-  text-align: center;
 }
 
 .slot-frame {
   position: relative;
-  width: 300px;
-  margin: 20px auto;
+  margin-top: 30px;
 }
 
-.slot-frame .frame {
-  width: 100%;
+.frame {
+  width: 300px; /* 放大2倍 */
 }
 
 .slot-window {
   position: absolute;
-  top: 30%;
+  top: 30px;
   left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  color: #ffd700;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 200px; /* 显示5行，每行40px */
+  overflow: hidden;
 }
 
-.buttons {
-  margin: 15px;
+.slot-window ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  transition: transform 3s ease-out;
 }
 
-.btn {
-  width: 100px;
-  margin: 0 10px;
-  cursor: pointer;
+.slot-window li {
+  height: 40px;
+  line-height: 40px;
+  font-size: 22px;
+  text-align: center;
+  color: #fff;
 }
 
-.speed-buttons {
-  margin: 10px;
+.controls {
+  margin: 20px;
 }
 
-.speed-btn {
+.controls button img {
+  width: 120px;
+}
+
+.speed img {
   width: 60px;
-  margin: 0 5px;
+  margin: 5px;
   cursor: pointer;
 }
 
 .winners-box {
-  position: relative;
-  width: 420px;
-  margin: 20px auto;
-}
-
-.winners-box .winners-bg {
-  width: 100%;
-}
-
-.winners-box ul {
   position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  list-style: none;
-  padding: 0;
+  bottom: 50px;
+  right: 50px;
+  text-align: center;
+}
+
+.winners-frame {
+  width: 240px; /* 放大1.5倍 */
+}
+
+#winnersList {
   margin: 0;
-  width: 80%;
-  font-size: 18px;
-  color: #fff;
-  text-align: left;
-}
-
-/* 粒子 */
-.falling {
-  position: fixed;
-  top: -50px;
-  pointer-events: none;
-  z-index: 999;
-  width: 40px;
-  height: 40px;
-  background-size: contain;
-  background-repeat: no-repeat;
-  animation: fall linear forwards;
-}
-
-@keyframes fall {
-  to {
-    transform: translateY(120vh) rotate(360deg);
-    opacity: 0;
-  }
+  padding: 0;
+  list-style: none;
+  color: gold;
+  font-size: 20px;
 }
