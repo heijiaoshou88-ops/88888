@@ -1,136 +1,191 @@
-const API_URL = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare";
+// —— 后端只用 prepare：一次性返回所有中奖ID，前端逐个播 —— //
+const PREPARE_URL = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare";
 
 let participants = [];
 let winnersQueue = [];
-let speedFactor = 1;
 let drawId = null;
+let speedFactor = 1;       // 1/2/5/10
+const ROW_H = 40;          // 与 CSS 行高一致
+const BASE_SPIN_MS = 3000; // 基础 3s
 
+// DOM
+const startPage = document.getElementById("startPage");
+const drawPage  = document.getElementById("drawPage");
+const slotList  = document.getElementById("slotList");
+const winnersList = document.getElementById("winnersList");
+
+// ---------- 小工具：更稳的取值 & 兼容各种响应包裹 ----------
+function getPath(obj, path) {
+  // path: "data.draw_id" / "draw_id"
+  return path.split(".").reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj);
+}
+function pickFirst(obj, paths, fallback=null) {
+  for (const p of paths) {
+    const v = getPath(obj, p);
+    if (v !== undefined && v !== null) return v;
+  }
+  return fallback;
+}
+function toArray(v) {
+  if (Array.isArray(v)) return v;
+  if (v === undefined || v === null) return [];
+  return [v];
+}
+function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ---------- 提交设置（prepare） ----------
 document.getElementById("prepareBtn").addEventListener("click", async () => {
-  participants = document.getElementById("participantsInput").value.trim().split("\n").filter(x => x);
-  const winnersCount = parseInt(document.getElementById("winnersCount").value);
+  participants = document.getElementById("participantsInput")
+    .value.trim().split("\n").map(s => s.trim()).filter(Boolean);
+  const winnersCount = parseInt(document.getElementById("winnersCount").value, 10);
 
-  if (participants.length === 0 || !winnersCount) {
-    alert("请填写完整信息！");
+  if (!participants.length || !Number.isFinite(winnersCount) || winnersCount <= 0) {
+    alert("请填写完整信息");
     return;
   }
 
   try {
-    const bodyData = {
-      participants: participants,
+    const body = {
+      participants,
       winners_count: winnersCount,
-      banner: null,        // 必须加上，不然 FastAPI 可能校验不通过
+      banner: null,
       font_style: null
     };
+    console.log("🔸 发送到后端:", body);
 
-    console.log("发送到后端:", bodyData);
-
-    const res = await fetch(API_URL, {
+    const res = await fetch(PREPARE_URL, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(bodyData)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
     });
+    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
 
-    if (!res.ok) {
-      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    const raw = await res.json();
+    console.log("🔹 prepare返回原始:", raw);
+
+    // ✅ 兼容多种结构：{draw_id,...} 或 {ok:true,data:{draw_id,...}} 或 {result:{...}} 等
+    drawId = pickFirst(raw, ["draw_id", "data.draw_id", "result.draw_id", "payload.draw_id", "id"], null);
+    const winnersRaw = pickFirst(raw, ["winners", "data.winners", "result.winners", "payload.winners"], []);
+    winnersQueue = toArray(winnersRaw).map(String); // 统一转字符串，避免比较失败
+
+    console.log("✅ 已解析:", { drawId, winnersQueue });
+
+    if (!winnersQueue.length) {
+      alert("后端未返回 winners，请检查响应。");
+      return;
     }
-
-    const data = await res.json();
-    console.log("抽奖准备返回:", data);
-
-    // 保证 winnersQueue 一定是数组
-    if (Array.isArray(data.winners)) {
-      winnersQueue = [...data.winners];
-    } else if (typeof data.winners === "string") {
-      winnersQueue = [data.winners];
-    } else {
-      winnersQueue = [];
-    }
-
-    drawId = data.draw_id || null;
-    console.log("drawId 已保存:", drawId);
 
     // 切换页面
-    document.getElementById("startPage").style.display = "none";
-    document.getElementById("drawPage").style.display = "flex";
+    startPage.classList.add("hidden");
+    setTimeout(() => drawPage.classList.remove("hidden"), 400);
 
   } catch (err) {
-    console.error("准备抽奖失败:", err);
-    alert("后端连接失败！请检查 API_URL 或网络。");
+    console.error("❌ 准备失败:", err);
+    alert("后端连接失败或响应不合法");
   }
 });
 
-document.getElementById("startBtn").addEventListener("click", startDrawAnimation);
-
-document.querySelectorAll(".speedBtn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    speedFactor = parseInt(btn.dataset.speed);
+// ---------- 倍速 ----------
+document.querySelectorAll(".speed-btn").forEach(img => {
+  img.addEventListener("click", () => {
+    const f = parseInt(img.dataset.speed, 10);
+    if (Number.isFinite(f) && f > 0) speedFactor = f;
   });
 });
 
-function startDrawAnimation() {
-  if (!winnersQueue.length) {
-    alert("中奖名单已全部显示！");
+// ---------- 开始：一次点击播完整个 winnersQueue ----------
+document.getElementById("startBtn").addEventListener("click", async () => {
+  if (!drawId || !winnersQueue.length) {
+    alert("请先在开始页提交并确保后端返回 winners");
     return;
   }
-
-  const winner = winnersQueue.shift();
-  console.log("显示中奖ID:", winner);
-
-  const slotList = document.getElementById("slotList");
-  let listHtml = "";
-  for (let i = 0; i < 10; i++) {
-    listHtml += participants.map(id => `<li>${id}</li>`).join("");
+  const btn = document.getElementById("startBtn");
+  btn.style.pointerEvents = "none";
+  try {
+    while (winnersQueue.length) {
+      const winner = winnersQueue.shift();
+      await playOne(winner);
+      await wait(300); // 回合间小停顿
+    }
+  } finally {
+    btn.style.pointerEvents = "";
   }
-  slotList.innerHTML = listHtml;
+});
 
-  const allItems = slotList.children;
-  const winnerIndex = [...allItems].findIndex(li => li.textContent === String(winner));
-  const stopRow = winnerIndex - 2; // 中间第3行
-  const targetY = -stopRow * 40;
+// ---------- 复制中奖名单 ----------
+document.getElementById("copyBtn").addEventListener("click", () => {
+  const text = [...winnersList.querySelectorAll("li")].map(li => li.textContent).join("\n");
+  navigator.clipboard.writeText(text || "");
+  alert("已复制中奖名单");
+});
 
-  slotList.style.transition = `transform ${3 / speedFactor}s ease-out`;
+// ---------- 播放单个中奖：列表滚动→停在目标→高亮→落入名单→粒子 ----------
+async function playOne(winner) {
+  // 1) 填充滚动列表：把 participants 循环很多遍，保证滚动距离足够
+  const cycles = 14;
+  let html = "";
+  for (let i = 0; i < cycles; i++) html += participants.map(id => `<li>${id}</li>`).join("");
+  slotList.innerHTML = html;
+
+  // 2) 找到目标 winner 在大列表的首次出现；如果没有，兜底追加一次
+  let idx = [...slotList.children].findIndex(li => li.textContent === String(winner));
+  if (idx < 0) {
+    slotList.insertAdjacentHTML("beforeend", `<li>${String(winner)}</li>`);
+    idx = slotList.children.length - 1;
+  }
+
+  // 3) 目标停在可见区域的“第3行”（中间偏上）
+  const targetRow = 2; // 从 0 开始 → 第3行
+  const stopRow = Math.max(0, idx - targetRow);
+  const targetY = -stopRow * ROW_H;
+
+  const spinMs = Math.max(300, Math.round(BASE_SPIN_MS / speedFactor));
+  slotList.style.transition = `transform ${spinMs}ms cubic-bezier(.15,.85,.25,1)`;
   slotList.style.transform = `translateY(${targetY}px)`;
 
-  setTimeout(() => {
-    if (winnerIndex >= 0) {
-      allItems[winnerIndex].style.color = "gold";
-      allItems[winnerIndex].style.fontSize = "26px";
-    }
+  await wait(spinMs + 60);
 
-    // 加入 winnersBox
-    const li = document.createElement("li");
-    li.textContent = winner;
-    document.getElementById("winnersList").appendChild(li);
+  // 4) 高亮中奖项
+  const liHit = slotList.children[idx];
+  if (liHit) liHit.classList.add("highlight");
 
-    spawnFallingItems();
+  // 5) 加入 winners 框
+  const li = document.createElement("li");
+  li.textContent = String(winner);
+  winnersList.appendChild(li);
 
-    if (winnersQueue.length > 0) {
-      setTimeout(startDrawAnimation, 2000);
-    }
-  }, (3100 / speedFactor));
+  // 6) 粒子掉落
+  spawnParticles();
+
+  await wait(900);
 }
 
-function spawnFallingItems() {
-  const particles = ["coin1.png", "coin2.png", "coin3.png", "gold1.png", "gold2.png", "gold3.png", "diamond.png"];
-  const count = 15 + Math.floor(Math.random() * 15);
+// ---------- 粒子 ----------
+function spawnParticles() {
+  const hostId = "particlesHost";
+  let host = document.getElementById(hostId);
+  if (!host) {
+    host = document.createElement("div");
+    host.id = hostId;
+    document.body.appendChild(host);
+  }
+
+  const imgs = ["coin1.png","coin2.png","coin3.png","gold1.png","gold2.png","gold3.png","diamond.png"];
+  const count = 15 + Math.floor(Math.random() * 16); // 15~31
 
   for (let i = 0; i < count; i++) {
     const el = document.createElement("img");
-    el.src = "img/" + particles[Math.floor(Math.random() * particles.length)];
+    el.src = "img/" + imgs[Math.floor(Math.random() * imgs.length)];
     el.className = "particle";
     el.style.left = Math.random() * window.innerWidth + "px";
-    el.style.top = "-50px";
-    el.style.width = "30px";
-    el.style.position = "fixed";
-    el.style.opacity = "1";
-    el.style.transition = "transform 3s linear, opacity 3s";
-    document.body.appendChild(el);
+    el.style.transform = `translateY(-50px) rotate(${Math.random()*360}deg)`;
+    host.appendChild(el);
 
-    setTimeout(() => {
-      el.style.transform = `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 360}deg)`;
+    requestAnimationFrame(() => {
+      el.style.transform = `translateY(${window.innerHeight + 80}px) rotate(${Math.random()*720}deg)`;
       el.style.opacity = "0";
-    }, 50);
+    });
 
-    setTimeout(() => el.remove(), 3100);
+    setTimeout(() => el.remove(), 3200);
   }
 }
