@@ -1,49 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>抽奖机</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- 开始页 -->
-  <div id="startPage" class="page" style="background-image: url('img/bg_start.jpg')">
-    <div class="form">
+  <section id="startPage" class="page" style="background-image:url('img/bg_start.jpg')">
+    <div class="start-card">
       <h2>抽奖设置</h2>
       <textarea id="participantsInput" placeholder="输入参与ID，每行一个"></textarea>
-      <input id="winnersCount" type="number" placeholder="中奖人数">
-      <button id="prepareBtn">
-        <img src="img/bg_start.png" alt="开始按钮">
+      <input id="winnersCount" type="number" min="1" placeholder="中奖人数" />
+      <button id="prepareBtn" class="img-btn">
+        <img src="img/bg_start.png" alt="开始" />
       </button>
     </div>
-  </div>
+  </section>
 
   <!-- 抽奖页 -->
-  <div id="drawPage" class="page" style="display:none; background-image: url('img/bg_draw.jpg')">
-    <div class="slot-frame">
-      <img src="img/slot_frame.png" class="frame" alt="老虎机框架">
-      <div class="slot-window">
-        <ul id="slotList"></ul>
+  <section id="drawPage" class="page hidden" style="background-image:url('img/bg_draw.jpg')">
+    <!-- 老虎机（放大2倍） -->
+    <div class="slot-scale">
+      <div class="slot-wrap">
+        <img src="img/slot_frame.png" class="slot-frame" alt="slot frame" />
+        <div class="slot-window">
+          <div class="fade-mask top"></div>
+          <ul id="slotList"></ul>
+          <div class="fade-mask bottom"></div>
+        </div>
       </div>
     </div>
 
+    <!-- 控件 -->
     <div class="controls">
-      <button id="startBtn"><img src="img/start_btn.png" alt="开始抽奖"></button>
-      <button id="copyBtn"><img src="img/copy_btn.png" alt="复制"></button>
+      <button id="startBtn" class="img-btn"><img src="img/start_btn.png" alt="开始抽奖" /></button>
+      <button id="copyBtn" class="img-btn"><img src="img/copy_btn.png" alt="复制" /></button>
     </div>
 
+    <!-- 倍速 -->
     <div class="speed">
-      <img src="img/speed1.png" class="speedBtn" data-speed="1">
-      <img src="img/speed2.png" class="speedBtn" data-speed="2">
-      <img src="img/speed5.png" class="speedBtn" data-speed="5">
-      <img src="img/speed10.png" class="speedBtn" data-speed="10">
+      <img src="img/speed1.png" class="speed-btn" data-speed="1" alt="1x" />
+      <img src="img/speed2.png" class="speed-btn" data-speed="2" alt="2x" />
+      <img src="img/speed5.png" class="speed-btn" data-speed="5" alt="5x" />
+      <img src="img/speed10.png" class="speed-btn" data-speed="10" alt="10x" />
     </div>
 
-    <div class="winners-box">
-      <img src="img/winners_box.png" class="winners-frame" alt="中奖框">
-      <ul id="winnersList"></ul>
+    <!-- 中奖框（放大1.5倍） -->
+    <div class="winners-scale">
+      <div class="winners-wrap">
+        <img src="img/winners_box.png" class="winners-frame" alt="winners" />
+        <ul id="winnersList"></ul>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- 粒子容器 -->
+  <div id="particlesHost"></div>
 
   <script src="app.js"></script>
 </body>
