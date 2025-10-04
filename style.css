@@ -1,167 +1,232 @@
+/***********************
+ * 抽奖项目 - 样式总表  (仅布局/视觉，不改 JS)
+ * 说明：
+ * - 通过 :root 的变量快速控制“整体大小、整体上移、字号、行高”等
+ * - 两个页面用 .page 全屏固定，切换靠 JS 加/去 .hidden
+ * - 老虎机：slot_frame 放大、上移；slot_window 只显示框内；列表真实滚动
+ ***********************/
+
+/* ====== 全局变量（改这里即可快速微调） ====== */
 :root{
-  /* ===== 可调参数（只改这里就能微调） ===== */
-  --slot-scale: 3;         /* 老虎机整体缩放：原2 → 现在3（再放大1倍） */
-  --slot-offset-y: -32px;  /* 老虎机整体上移：负值向上，可调 -24/-40 */
-  --slot-font-size: 13;    /* 滚动ID字号：原18 → 减5变13 */
-  --slot-base-width: 260px;/* 老虎机（未缩放）底层宽度 */
-  --row-h: 40px;           /* 单行高度，影响滚动步长 */
+  --slot-scale: 3.2;          /* 老虎机整体缩放倍率：原来约 2 → 你现在需要更大，所以设 3.2 */
+  --slot-offset-y: -56px;     /* 老虎机整体“垂直位移”：负值=向上移动，正值=向下（这里整体上移 56px） */
+  --slot-font-size: 12;       /* 老虎机内滚动数字的字号（之前 18 → 13，现在再紧凑一点 12） */
+  --slot-base-width: 260px;   /* 老虎机（未缩放）画布宽度，用来包裹 slot_frame.png 图片 */
+  --row-h: 40px;              /* 列表每行的高度（与 JS 的 ROW_H=40 保持一致，别随意改） */
 }
 
-/* ===== 页面切换（只用 CSS，不改 JS） ===== */
-.hidden { display: none !important; }
+/* ====== 页面显示/隐藏 ====== */
+.hidden{                       /* 真隐藏：用于 JS 切页时直接 display:none */
+  display: none !important;
+}
+.page{                         /* 两个页面（开始页/抽奖页）都固定全屏，不会把页面拉长 */
+  position: fixed !important;  /* 固定定位：始终铺满视口 */
+  inset: 0 !important;         /* 等价于 top/right/bottom/left = 0 */
+}
 
-/* 两个页面强制全屏覆盖 */
-.page{ position: fixed !important; inset: 0 !important; }
-
-/* 如果抽奖页可见，则强制隐藏开始页（不需要JS参与） */
-body:has(#drawPage:not(.hidden)) #startPage { display: none !important; }
-
-/* ===== 基础 ===== */
-*{ box-sizing: border-box; }
+/* ====== 基础 Reset / 布局 ====== */
+*{ box-sizing: border-box; }   /* 统一盒模型，padding/border 不再撑大元素 */
 html,body{
-  margin:0; height:100%;
-  font-family:"Microsoft YaHei", system-ui, Arial;
-  overflow:hidden;
+  margin:0;                    /* 去掉默认外边距 */
+  height:100%;                 /* 让 body 铺满视口高度 */
+  font-family:"Microsoft YaHei", system-ui, Arial; /* 中文优先的字体栈 */
+  overflow:hidden;             /* 禁止滚动条（两个页面叠在一起时更安全） */
 }
 .page{
-  background-size:cover; background-position:center;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  z-index:0;
+  background-size:cover;       /* 背景图铺满，按比例裁切 */
+  background-position:center;  /* 背景图居中 */
+  display:flex;                /* 用弹性盒居中内容 */
+  flex-direction:column;       /* 垂直堆叠子元素 */
+  align-items:center;          /* 水平居中 */
+  justify-content:center;      /* 垂直居中 */
+  z-index:0;                   /* 基线层级（粒子会在更高的层级） */
 }
 
-/* ===== 开始卡片 ===== */
+/* ====== 开始页卡片（输入ID/中奖数） ====== */
 .start-card{
-  background: rgba(255,255,255,.86);
-  padding: 16px 18px; border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  display:flex; flex-direction:column; gap:10px; align-items:center;
+  background: rgba(255,255,255,.86);      /* 半透明白底，压住背景图 */
+  padding: 16px 18px;                     /* 内边距 */
+  border-radius: 12px;                    /* 圆角 */
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);/* 柔和阴影 */
+  display:flex;                           /* 内部竖排 */
+  flex-direction:column;
+  gap:10px;                               /* 子元素间距 */
+  align-items:center;                     /* 子元素水平居中 */
 }
-.start-card h2{ margin: 0 0 8px; }
-.start-card textarea{
-  width: 280px; height: 160px; resize: vertical;
-  padding: 8px; border:none; outline:none; border-radius:8px; font-size:14px;
-  background: rgba(0,0,0,.06);
+.start-card h2{ margin: 0 0 8px; }        /* 标题下方留一点间距 */
+
+.start-card textarea{                      /* 参与ID输入框（每行一个） */
+  width: 280px;                            /* 宽度 */
+  height: 160px;                           /* 高度，可根据需要改 */
+  resize: vertical;                        /* 允许垂直拖拽 */
+  padding: 8px;                            /* 内边距 */
+  border:none; outline:none;               /* 去边框/聚焦描边 */
+  border-radius:8px;                       /* 圆角 */
+  font-size:14px;                          /* 字号 */
+  background: rgba(0,0,0,.06);             /* 淡灰背景，便于区分 */
 }
-.start-card input{
-  width: 280px; padding: 8px; border:none; outline:none; border-radius:8px; font-size:14px;
+.start-card input{                         /* 中奖人数输入框 */
+  width: 280px;
+  padding: 8px;
+  border:none; outline:none;
+  border-radius:8px;
+  font-size:14px;
   background: rgba(0,0,0,.06);
 }
 
-/* ===== 图片按钮：去掉白色方块/原生样式 ===== */
+/* ====== 图片按钮（去掉默认白底/内边距/原生外观） ====== */
 .img-btn{
-  display:inline-block !important;
-  border:0 !important;
-  background: transparent !important;
-  padding:0 !important;
-  outline: none !important;
-  box-shadow: none !important;
-  -webkit-appearance: none !important;
+  display:inline-block !important;         /* 按钮转成行内块，方便摆放 */
+  border:0 !important;                     /* 去边框 */
+  background: transparent !important;      /* 背景透明，显示按钮图片本身 */
+  padding:0 !important;                    /* 去默认内边距 */
+  outline: none !important;                /* 去聚焦描边（如需无障碍可另加可见样式） */
+  box-shadow: none !important;             /* 去阴影 */
+  -webkit-appearance: none !important;     /* 去掉浏览器默认按钮外观 */
   appearance: none !important;
 }
-.img-btn::-moz-focus-inner{ border:0; padding:0; }
-.img-btn img{ width:180px; display:block }
+.img-btn::-moz-focus-inner{ border:0; padding:0; } /* Firefox 内部补偿去掉 */
+.img-btn img{ width:180px; display:block }          /* 图片按钮默认宽度（开始页用），抽奖页按钮我会另外缩放 */
 
-/* ===== 老虎机整体（放大+上移） ===== */
+/* ====== 老虎机主体（放大 + 上移） ====== */
 .slot-scale{
-  transform: translateY(var(--slot-offset-y)) scale(var(--slot-scale));
-  transform-origin: top center;
-  margin-top: 0;
-  margin-bottom: 48px;  /* 与按钮留出足够距离，防止遮挡 */
+  transform: translateY(var(--slot-offset-y)) scale(var(--slot-scale)); /* 整体上移 + 整体放大，两个变量可随时改 */
+  transform-origin: top center;                /* 以顶部中点为缩放基准，放大时更像“往上长” */
+  margin-top: 0;                               /* 上方不额外留空 */
+  margin-bottom: 48px;                         /* 与下方按钮区留安全距离，避免遮住窗口 */
 }
-.slot-wrap{ position:relative; width: var(--slot-base-width); margin:0 auto; }
-.slot-frame{ width:100%; display:block; }
+.slot-wrap{
+  position:relative;                           /* 为内部绝对定位的窗口/遮罩提供参照 */
+  width: var(--slot-base-width);               /* 未缩放时的包裹宽度（图片自适应） */
+  margin:0 auto;                               /* 居中 */
+}
+.slot-frame{
+  width:100%;                                  /* slot_frame.png 宽度占满容器 */
+  display:block;                               /* 去掉行内元素间隙 */
+}
 
-/* ===== 1列5行窗口：只让框内内容可见 ===== */
+/* ====== 老虎机可视窗口（只显示框内内容） ====== */
 .slot-window{
-  position:absolute; left:50%; transform: translateX(-50%);
-  top: 58px;                      /* 按你的slot_frame透明窗位置；不跟随scale变化 */
-  width: 130px;
-  height: calc(var(--row-h) * 5); /* 1×5 行 */
-  overflow: hidden;
-  z-index: 3;
-  clip-path: inset(0);            /* 兜底裁切，彻底杜绝“露头” */
-  contain: paint;                 /* 独立绘制层，避免溢绘 */
+  position:absolute;                           /* 固定在 slot_frame 对应的“窗洞”位置 */
+  left:50%; transform: translateX(-50%);       /* 水平居中对齐 */
+  top: 50px;                                   /* 窗口在框里的“上边距”（越小越靠上，可按视觉微调；原 58px → 50px） */
+  width: 130px;                                /* 窗口宽度（配合你的 UI 贴图） */
+  height: calc(var(--row-h) * 5);              /* 显示 5 行（1 列 × 5 行），与停在“第 3 行”保持一致 */
+  overflow: hidden;                            /* 裁掉超出窗口的内容 */
+  z-index: 3;                                  /* 处在 slot_frame 装饰层之下/之上视你的结构而定，这里 3 足够 */
+  clip-path: inset(0);                         /* 第二重裁切（部分设备 transform 溢绘时兜底） */
+  contain: paint;                              /* 浏览器只绘制这个区域，减少外溢带来的影响 */
 }
 
-/* ===== 滚动列表 ===== */
+/* ====== 滚动列表（JS 会塞很多 li） ====== */
 #slotList{
-  list-style:none; margin:0; padding:0;
-  position:relative; z-index:1;
-  will-change: transform;
-  transition: transform 3s cubic-bezier(.15,.85,.25,1);
+  list-style:none; margin:0; padding:0;       /* 去默认列表样式/间距 */
+  position:relative; z-index:1;               /* 在窗口层级下 */
+  will-change: transform;                      /* 提示浏览器该属性会频繁变化（性能优化） */
+  transition: transform 3s cubic-bezier(.15,.85,.25,1); /* 默认滚动时长/缓动（实际时长由 JS 改） */
 }
 #slotList li{
-  height: var(--row-h);
-  line-height: var(--row-h);
-  text-align:center;
-  font-size: calc(var(--slot-font-size) * 1px);  /* 18 → 13 */
-  color:#fff;
-  letter-spacing: -0.35px;                       /* 更紧凑 */
-  font-variant-numeric: tabular-nums;            /* 数字等宽更整齐 */
-  text-shadow: 0 1px 2px rgba(0,0,0,.9);
+  height: var(--row-h);                        /* 每行高度（与 JS 的 ROW_H 一致） */
+  line-height: var(--row-h);                   /* 行高 = 高度，使数字垂直居中 */
+  text-align:center;                           /* 居中对齐数字 */
+  font-size: calc(var(--slot-font-size) * 1px);/* 数字字号（变量控制） */
+  color:#fff;                                  /* 白字 */
+  letter-spacing: -0.35px;                     /* 负字距：更紧凑（-0.2 ~ -0.5 可按观感微调） */
+  font-variant-numeric: tabular-nums;          /* 数字等宽：列垂直时更整齐 */
+  text-shadow: 0 1px 2px rgba(0,0,0,.9);       /* 文字阴影，提高对比度与可读性 */
 }
 
-/* 高亮：只做scale脉冲，避免字号叠加（外层还有scale(3)） */
+/* ====== 中奖高亮（只做缩放脉冲，不改字号，避免叠加放大“顶出窗口”） ====== */
 #slotList li.highlight{
-  color:#ffd700;
-  font-weight:700;
-  animation: pulseScale .9s ease-in-out 2;
+  color:#ffd700;                               /* 金色 */
+  font-weight:700;                             /* 粗体增强 */
+  animation: pulseScale .9s ease-in-out 2;     /* 脉冲缩放 0.9s，循环两次 */
 }
 @keyframes pulseScale{
-  0%{ transform:scale(1) }
-  50%{ transform:scale(1.15) }
+  0%{   transform:scale(1) }
+  50%{  transform:scale(1.15) }                /* 稍微变大一点 */
   100%{ transform:scale(1) }
 }
 
-/* 顶/底渐隐遮罩，仅36px，不是整块灰蒙层 */
+/* ====== 顶/底渐隐遮罩（只遮 36px，不是整块灰） ====== */
 .fade-mask{
-  position:absolute; left:0; width:100%; height:36px; pointer-events:none; z-index:4;
-  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));
+  position:absolute; left:0; width:100%; height:36px; /* 遮罩高度 36 像素 */
+  pointer-events:none;                                 /* 不影响鼠标事件 */
+  z-index:4;                                           /* 压在列表之上，产生“渐隐”效果 */
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0)); /* 从上到下逐渐透明 */
 }
-.fade-mask.bottom{ bottom:0; top:auto; transform: rotate(180deg); }
-.fade-mask.top{ top:0; }
+.fade-mask.bottom{
+  bottom:0; top:auto; transform: rotate(180deg);       /* 底部遮罩复用同一个渐变，180° 翻转即可 */
+}
+.fade-mask.top{ top:0; }                                /* 顶部遮罩放在上边 */
 
-/* ===== 控件：不遮窗 ===== */
+/* ====== 控件区（开始/复制按钮 + 倍速按钮） ====== */
 .controls{
-  margin: 8px 0 10px;
-  display:flex; gap:16px; align-items:center; z-index:1;
+  margin: 8px 0 10px;            /* 与老虎机窗口保持距离，避免遮挡 */
+  display:flex; gap:16px;        /* 横向排布，按钮之间留 16px */
+  align-items:center;
+  z-index:1;                     /* 在老虎机之下的安全层级（窗口 z-index:3） */
 }
-.controls .img-btn img{ width:120px; }
+.controls .img-btn img{
+  width:120px;                   /* 抽奖页按钮相对开始页缩小些，看起来更协调 */
+}
 
-/* 倍速：带选中态（JS 已处理active类，这里只给样式） */
-.speed{ display:flex; gap:8px; margin-bottom:8px; z-index:1; }
+/* ====== 倍速按钮：选中态（JS 会加 .active） ====== */
+.speed{
+  display:flex; gap:8px;         /* 1x/2x/5x/10x 之间的间距 */
+  margin-bottom:8px; z-index:1;
+}
 .speed img{
-  width:60px; cursor:pointer; user-select:none;
-  opacity:.85; transition: transform .15s ease, opacity .15s ease, filter .15s ease;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+  width:60px; cursor:pointer; user-select:none;                 /* 指针样式 & 禁止选中 */
+  opacity:.85;                                                   /* 未选中稍微淡一点 */
+  transition: transform .15s ease, opacity .15s ease, filter .15s ease; /* 小动画 */
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));               /* 轻微投影 */
 }
 .speed img.active{
-  transform: translateY(-2px) scale(1.05);
-  opacity:1;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,.45));
+  transform: translateY(-2px) scale(1.05);                      /* 选中稍微上抬、放大一点 */
+  opacity:1;                                                    /* 更亮 */
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,.45));               /* 阴影更重一点 */
 }
 
-/* ===== 中奖框：放大1.5×，右下角，并可滚动 ===== */
+/* ====== 中奖名单框（右下角，整体放大 1.5 倍） ====== */
 .winners-scale{
-  position:absolute; right:36px; bottom:24px;
-  transform: scale(1.5); transform-origin: bottom right;
+  position:absolute; right:36px; bottom:24px;                   /* 固定在右下 */
+  transform: scale(1.5); transform-origin: bottom right;        /* 以右下为缩放基点，更贴边 */
 }
-.winners-wrap{ position:relative; width:220px; }
-.winners-frame{ width:100%; display:block; }
+.winners-wrap{ position:relative; width:220px; }                 /* 包裹框体图片与文字区域 */
+.winners-frame{ width:100%; display:block; }                     /* winners_box.png 撑满容器 */
 #winnersList{
-  position:absolute; left:50%; transform:translateX(-50%);
-  top:30px; width:76%;
-  max-height: 120px;
-  overflow: auto;
-  list-style:none; margin:0; padding:0 4px;
-  color:#ffe38a; text-shadow:0 1px 2px #000;
-  font-size:16px; line-height:22px;
+  position:absolute; left:50%; transform:translateX(-50%);      /* 中奖文字区域水平居中 */
+  top:30px; width:76%;                                           /* 根据你的框体留出左右边距 */
+  max-height: 120px;                                             /* 最多显示约 5~6 行，超出滚动 */
+  overflow: auto;                                                /* 允许滚动（名单过长不溢出） */
+  list-style:none; margin:0; padding:0 4px;                      /* 去默认样式，左右各 4px 内边距 */
+  color:#ffe38a; text-shadow:0 1px 2px #000;                     /* 金色 + 阴影，易读 */
+  font-size:16px; line-height:22px;                              /* 中奖名单的行高 */
 }
 
-/* ===== 粒子（JS里会创建img.particle；这里留样式即可） ===== */
+/* ====== 粒子（金币/金元宝/钻石），JS 会创建 .particle IMG ====== */
 .particle{
-  position: fixed; top:-50px; left:0;
-  width:34px; height:34px; object-fit:contain;
-  pointer-events:none; z-index:999; opacity:1;
-  transition: transform 3s linear, opacity 3s;
+  position: fixed; top:-50px; left:0;                            /* 从屏幕顶上方生成，往下掉 */
+  width:34px; height:34px; object-fit:contain;                   /* 保持图片比例 */
+  pointer-events:none; z-index:999; opacity:1;                   /* 在最上层，不挡交互 */
+  transition: transform 3s linear, opacity 3s;                   /* 位移 + 透明度 3s 动画（JS 会设置终点） */
 }
+
+/* ====== （可选）兜底强制覆盖：如果你的线上的旧样式很“倔”，放开下面注释 ====== */
+/*
+.slot-scale{
+  transform: translateY(-56px) scale(3.2) !important;            // 直接把放大+上移“钉死”，权重最高
+  transform-origin: top center !important;
+  margin-bottom: 48px !important;
+}
+.slot-window{
+  top: 50px !important;                                          // 窗口在框里更靠上一些
+  width: 130px !important;
+  height: calc(var(--row-h) * 5) !important;
+}
+#slotList li{
+  font-size: 12px !important;                                    // 数字更小更紧凑
+  letter-spacing: -0.35px !important;
+}
+*/
