@@ -109,7 +109,7 @@ html,body{
 .slot-window{
   position:absolute;                           /* 固定在 slot_frame 对应的“窗洞”位置 */
   left:50%; transform: translateX(-50%);       /* 水平居中对齐 */
-  top: 10px;                                   /* 窗口在框里的“上边距”（越小越靠上，可按视觉微调；原 58px → 50px） */
+  top: 45px;                                   /* 窗口在框里的“上边距”（越小越靠上，可按视觉微调；原 58px → 50px） */
   width: 70px;                                /* 窗口宽度（配合你的 UI 贴图） */
   height: calc(var(--row-h) * 5);              /* 显示 5 行（1 列 × 5 行），与停在“第 3 行”保持一致 */
   overflow: hidden;                            /* 裁掉超出窗口的内容 */
