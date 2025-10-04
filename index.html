@@ -8,20 +8,20 @@
 </head>
 <body>
   <!-- 开始页 -->
-  <section id="startPage" class="page" style="background-image:url('img/bg_start.jpg'); display:flex;">
+  <section id="startPage" class="page" style="background-image:url('img/bg_start.jpg')">
     <div class="start-card">
       <h2>抽奖设置</h2>
       <textarea id="participantsInput" placeholder="输入参与ID，每行一个"></textarea>
       <input id="winnersCount" type="number" min="1" placeholder="中奖人数" />
-      <button id="prepareBtn" class="img-btn">
+      <button id="prepareBtn" class="img-btn" aria-label="提交设置">
         <img src="img/bg_start.png" alt="开始" />
       </button>
     </div>
   </section>
 
   <!-- 抽奖页（初始隐藏） -->
-  <section id="drawPage" class="page" style="background-image:url('img/bg_draw.jpg'); display:none;">
-    <!-- 老虎机（放大2倍） -->
+  <section id="drawPage" class="page hidden" style="background-image:url('img/bg_draw.jpg')">
+    <!-- 老虎机（整体放大2倍） -->
     <div class="slot-scale">
       <div class="slot-wrap">
         <img src="img/slot_frame.png" class="slot-frame" alt="slot frame" />
@@ -33,21 +33,21 @@
       </div>
     </div>
 
-    <!-- 控件 -->
+    <!-- 操作按钮 -->
     <div class="controls">
-      <button id="startBtn" class="img-btn"><img src="img/start_btn.png" alt="开始抽奖" /></button>
-      <button id="copyBtn" class="img-btn"><img src="img/copy_btn.png" alt="复制" /></button>
+      <button id="startBtn" class="img-btn" aria-label="开始抽奖"><img src="img/start_btn.png" alt="start up" /></button>
+      <button id="copyBtn"  class="img-btn" aria-label="复制名单"><img src="img/copy_btn.png"  alt="Copiar" /></button>
     </div>
 
     <!-- 倍速 -->
     <div class="speed">
-      <img src="img/speed1.png" class="speed-btn" data-speed="1" alt="1x" />
-      <img src="img/speed2.png" class="speed-btn" data-speed="2" alt="2x" />
-      <img src="img/speed5.png" class="speed-btn" data-speed="5" alt="5x" />
+      <img src="img/speed1.png"  class="speed-btn" data-speed="1"  alt="1x" />
+      <img src="img/speed2.png"  class="speed-btn" data-speed="2"  alt="2x" />
+      <img src="img/speed5.png"  class="speed-btn" data-speed="5"  alt="5x" />
       <img src="img/speed10.png" class="speed-btn" data-speed="10" alt="10x" />
     </div>
 
-    <!-- 中奖框（放大1.5倍，右下角） -->
+    <!-- 中奖框（放大1.5倍） -->
     <div class="winners-scale">
       <div class="winners-wrap">
         <img src="img/winners_box.png" class="winners-frame" alt="winners" />
