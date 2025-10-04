@@ -1,5 +1,5 @@
 // 后端：一次 prepare 返回所有中奖ID；前端逐个播放
-const API_URL = "http://bea00dfb492da2545c58357b3d367315.loophole.site/api/draw/prepare";
+const API_URL = "https://bea00dfb492da2545c58357b3d367315.loophole.site/api/draw/prepare";
 
 let participants = [];
 let winnersQueue = [];
@@ -35,7 +35,7 @@ document.getElementById("prepareBtn").addEventListener("click", async ()=>{
     const body = { participants, winners_count: winnersCount, banner: null, font_style: null };
     console.log("🔸 发送到后端:", body);
 
-    const res = await fetch(PREPARE_URL, {
+    const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type":"application/json" },
       body: JSON.stringify(body)
