@@ -15,20 +15,39 @@ document.getElementById("prepareBtn").addEventListener("click", async () => {
   }
 
   try {
+    const bodyData = {
+      participants: participants,
+      winners_count: winnersCount,
+      banner: null,        // 必须加上，不然 FastAPI 可能校验不通过
+      font_style: null
+    };
+
+    console.log("发送到后端:", bodyData);
+
     const res = await fetch(API_URL, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        participants: participants,
-        winners_count: winnersCount
-      })
+      body: JSON.stringify(bodyData)
     });
+
+    if (!res.ok) {
+      throw new Error(`HTTP ${res.status} ${res.statusText}`);
+    }
 
     const data = await res.json();
     console.log("抽奖准备返回:", data);
 
-    winnersQueue = [...data.winners];
-    drawId = data.draw_id;
+    // 保证 winnersQueue 一定是数组
+    if (Array.isArray(data.winners)) {
+      winnersQueue = [...data.winners];
+    } else if (typeof data.winners === "string") {
+      winnersQueue = [data.winners];
+    } else {
+      winnersQueue = [];
+    }
+
+    drawId = data.draw_id || null;
+    console.log("drawId 已保存:", drawId);
 
     // 切换页面
     document.getElementById("startPage").style.display = "none";
@@ -36,7 +55,7 @@ document.getElementById("prepareBtn").addEventListener("click", async () => {
 
   } catch (err) {
     console.error("准备抽奖失败:", err);
-    alert("后端连接失败！");
+    alert("后端连接失败！请检查 API_URL 或网络。");
   }
 });
 
@@ -65,7 +84,7 @@ function startDrawAnimation() {
   slotList.innerHTML = listHtml;
 
   const allItems = slotList.children;
-  const winnerIndex = [...allItems].findIndex(li => li.textContent === winner);
+  const winnerIndex = [...allItems].findIndex(li => li.textContent === String(winner));
   const stopRow = winnerIndex - 2; // 中间第3行
   const targetY = -stopRow * 40;
 
@@ -73,8 +92,10 @@ function startDrawAnimation() {
   slotList.style.transform = `translateY(${targetY}px)`;
 
   setTimeout(() => {
-    allItems[winnerIndex].style.color = "gold";
-    allItems[winnerIndex].style.fontSize = "26px";
+    if (winnerIndex >= 0) {
+      allItems[winnerIndex].style.color = "gold";
+      allItems[winnerIndex].style.fontSize = "26px";
+    }
 
     // 加入 winnersBox
     const li = document.createElement("li");
