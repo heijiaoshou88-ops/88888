@@ -1,13 +1,16 @@
 :root{
-  --slot-base-width: 260px;   /* 老虎机基准宽度（未缩放） */
-  --row-h: 40px;              /* 每行高度 */
+  --slot-base-width: 260px;   /* 老虎机未缩放宽度 */
+  --row-h: 40px;              /* 列表每行高度 */
 }
+
+/* 统一真隐藏 */
+.hidden { display: none !important; }
 
 /* 基础布局 */
 *{ box-sizing: border-box; }
 html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial; overflow:hidden; }
 .page{
-  position:fixed; inset:0;                /* 全屏，不占文档流高度 */
+  position:fixed; inset:0;                   /* 全屏，不占文档高度，避免两页叠加 */
   background-size:cover; background-position:center;
   display:flex; flex-direction:column; align-items:center; justify-content:center;
 }
@@ -20,7 +23,7 @@ html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial;
   display:flex; flex-direction:column; gap:10px; align-items:center;
 }
 .start-card textarea{
-  width: 280px; height: 140px; resize: vertical;
+  width: 280px; height: 160px; resize: vertical;
   padding: 8px; border:none; outline:none; border-radius:8px; font-size:14px;
   background: rgba(0,0,0,.06);
 }
@@ -31,11 +34,11 @@ html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial;
 .img-btn{ border:0; background:transparent; padding:0; cursor:pointer }
 .img-btn img{ width:180px; display:block }
 
-/* 老虎机整体放大2倍，不改变流式位置 */
+/* 老虎机整体放大2倍，不改文档流位置 */
 .slot-scale{
   transform: scale(2);
   transform-origin: top center;
-  margin-top: 4px; margin-bottom: 18px;   /* 与按钮留间距 */
+  margin-top: 4px; margin-bottom: 18px;     /* 与按钮留间距 */
 }
 .slot-wrap{ position:relative; width: var(--slot-base-width); margin:0 auto; }
 .slot-frame{ width:100%; display:block; }
@@ -48,7 +51,7 @@ html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial;
 }
 #slotList{
   list-style:none; margin:0; padding:0;
-  position:relative; z-index:1;           /* 在遮罩下层级 */
+  position:relative; z-index:1;
   transition: transform 3s cubic-bezier(.15,.85,.25,1);
 }
 #slotList li{
