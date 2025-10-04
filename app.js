@@ -1,5 +1,5 @@
 // 后端：一次 prepare 返回所有中奖ID；前端逐个播放
-const API_URL = "https://17ceae78f6ca2d31b30d826f39395a13.loophole.site/api/draw/prepare";
+const API_URL = "http://bea00dfb492da2545c58357b3d367315.loophole.site/api/draw/prepare";
 
 let participants = [];
 let winnersQueue = [];
