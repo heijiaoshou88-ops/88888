@@ -1,105 +1,120 @@
-body, html {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-size: cover;
-  background-position: center;
-  height: 100%;
+:root{
+  --slot-base-width: 260px;     /* 老虎机基准宽度（未缩放） */
+  --row-h: 40px;                /* 每行高度 */
+  --visible-rows: 5;            /* 可见行 */
+  --spin-ms: 3000ms;            /* 基础转动时间（受倍速影响） */
+}
+
+/* 全局 */
+*{ box-sizing: border-box; }
+html,body{ margin:0; height:100%; font-family: "Microsoft YaHei", system-ui, -apple-system, Arial; }
+.page{
+  position:relative; width:100%; height:100vh;
+  background-size: cover; background-position:center;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  transition: opacity .6s ease;
+}
+.hidden{ opacity:0; pointer-events:none }
+
+/* 开始卡片 */
+.start-card{
+  background: rgba(255,255,255,.86);
+  padding: 16px 18px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+  display:flex; flex-direction:column; gap:10px; align-items:center;
+}
+.start-card textarea{
+  width: 280px; height: 140px; resize: vertical;
+  padding: 8px; border: none; outline: none; border-radius: 8px; font-size: 14px;
+  background: rgba(0,0,0,.06);
+}
+.start-card input{
+  width: 280px; padding: 8px; border: none; outline: none; border-radius: 8px; font-size: 14px;
+  background: rgba(0,0,0,.06);
+}
+.img-btn{ border:0; background:transparent; padding:0; cursor:pointer }
+.img-btn img{ width: 180px; display:block }
+
+/* 老虎机区域（整体放大2倍且不跑位） */
+.slot-scale{
+  transform: scale(2);
+  transform-origin: top center;
+  margin-top: 12px;
+}
+.slot-wrap{
+  position: relative;
+  width: var(--slot-base-width);
+  margin: 0 auto;
+}
+.slot-frame{ width: 100%; display:block; }
+
+/* 1列5行窗口（与框同容器内，随整体一起缩放） */
+.slot-window{
+  position:absolute;
+  left:50%; transform: translateX(-50%);
+  top: 58px;                /* 视素材微调，保持居中 */
+  width: 130px;
+  height: calc(var(--row-h) * var(--visible-rows));
   overflow: hidden;
 }
-
-.page {
-  width: 100%;
-  height: 100vh;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+#slotList{
+  list-style:none; margin:0; padding:0;
+  transition: transform var(--spin-ms) cubic-bezier(.15,.85,.25,1);
+}
+#slotList li{
+  height: var(--row-h); line-height: var(--row-h);
+  text-align:center; font-size: 18px; color: #fff; text-shadow: 0 1px 2px #000;
+}
+#slotList li.highlight{
+  color: #ffd700; font-size: 22px; font-weight: 700;
+  animation: pulse .8s ease-in-out 2;
+}
+@keyframes pulse{
+  0%{ transform: scale(1); }
+  50%{ transform: scale(1.2); }
+  100%{ transform: scale(1); }
 }
 
-.form {
-  background: rgba(255,255,255,0.85);
-  padding: 20px;
-  border-radius: 12px;
+/* 顶/底淡入淡出遮罩 */
+.fade-mask{
+  position:absolute; left:0; width:100%; height: 36px; pointer-events:none;
+  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));
+  z-index: 2;
 }
+.fade-mask.bottom{
+  top: auto; bottom:0;
+  transform: rotate(180deg);
+}
+.fade-mask.top{ top:0; }
 
-textarea, input {
-  width: 250px;
-  margin: 10px 0;
-  padding: 8px;
+/* 控件 */
+.controls{ margin: 14px 0 6px; display:flex; gap:16px; align-items:center; }
+.controls .img-btn img{ width: 120px; }
+
+.speed{ display:flex; gap:8px; margin-bottom: 10px; }
+.speed img{ width:60px; cursor:pointer; user-select:none }
+
+/* 中奖框（放大1.5倍，固定在右下） */
+.winners-scale{
+  position:absolute; right: 36px; bottom: 24px;
+  transform: scale(1.5);
+  transform-origin: bottom right;
+}
+.winners-wrap{ position:relative; width: 220px; }
+.winners-frame{ width:100%; display:block; }
+#winnersList{
+  position:absolute; left:50%; transform: translateX(-50%);
+  top: 30px; width: 76%;
+  list-style:none; margin:0; padding:0;
+  color: #ffe38a; text-shadow: 0 1px 2px #000;
   font-size: 16px;
 }
 
-button img {
-  width: 180px;
-  cursor: pointer;
-}
-
-.slot-frame {
-  position: relative;
-  margin-top: 30px;
-}
-
-.frame {
-  width: 300px; /* 放大2倍 */
-}
-
-.slot-window {
-  position: absolute;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 120px;
-  height: 200px; /* 显示5行，每行40px */
-  overflow: hidden;
-}
-
-.slot-window ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  transition: transform 3s ease-out;
-}
-
-.slot-window li {
-  height: 40px;
-  line-height: 40px;
-  font-size: 22px;
-  text-align: center;
-  color: #fff;
-}
-
-.controls {
-  margin: 20px;
-}
-
-.controls button img {
-  width: 120px;
-}
-
-.speed img {
-  width: 60px;
-  margin: 5px;
-  cursor: pointer;
-}
-
-.winners-box {
-  position: absolute;
-  bottom: 50px;
-  right: 50px;
-  text-align: center;
-}
-
-.winners-frame {
-  width: 240px; /* 放大1.5倍 */
-}
-
-#winnersList {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  color: gold;
-  font-size: 20px;
+/* 粒子 */
+.particle{
+  position: fixed; top: -50px; left: 0;
+  width: 34px; height: 34px; object-fit: contain;
+  pointer-events: none; z-index: 999;
+  opacity: 1; transition: transform 3s linear, opacity 3s;
 }
