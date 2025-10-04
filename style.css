@@ -1,137 +1,187 @@
-:root{
-  --slot-base-width: 260px;   /* 老虎机未缩放宽度 */
-  --row-h: 40px;              /* 列表每行高度 */
+// 后端：一次 prepare 返回所有中奖ID；前端逐个播放
+const PREPARE_URL = "https://9defc7d31d73656585fca00da1d3bf19.loophole.site/api/draw/prepare";
+
+let participants = [];
+let winnersQueue = [];
+let drawId = null;
+let speedFactor = 1;            // 1 / 2 / 5 / 10
+const ROW_H = 40;               // 与 CSS 的 --row-h 保持一致
+const BASE_SPIN_MS = 3000;
+
+// DOM
+const startPage   = document.getElementById("startPage");
+const drawPage    = document.getElementById("drawPage");
+const slotList    = document.getElementById("slotList");
+const winnersList = document.getElementById("winnersList");
+
+// 工具
+const wait = (ms)=> new Promise(r=>setTimeout(r,ms));
+const getPath = (o,p)=> p.split(".").reduce((a,k)=>a?.[k], o);
+function pickFirst(obj, paths, fallback=null){ for(const p of paths){ const v=getPath(obj,p); if(v!==undefined&&v!==null) return v; } return fallback; }
+function toArray(v){ return Array.isArray(v)?v:(v==null?[]:[v]); }
+
+// -------- 提交设置（prepare） --------
+document.getElementById("prepareBtn").addEventListener("click", async ()=>{
+  participants = document.getElementById("participantsInput").value
+    .trim().split("\n").map(s=>s.trim()).filter(Boolean);
+  const winnersCount = parseInt(document.getElementById("winnersCount").value,10);
+
+  if(!participants.length || !Number.isFinite(winnersCount) || winnersCount<=0){
+    alert("请填写完整信息");
+    return;
+  }
+
+  try{
+    const body = { participants, winners_count: winnersCount, banner: null, font_style: null };
+    console.log("🔸 发送到后端:", body);
+
+    const res = await fetch(PREPARE_URL, {
+      method: "POST",
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
+
+    const raw = await res.json();
+    console.log("🔹 prepare返回原始:", raw);
+
+    drawId = pickFirst(raw, ["draw_id","data.draw_id","result.draw_id","payload.draw_id","id"], null);
+    const winnersRaw = pickFirst(raw, ["winners","data.winners","result.winners","payload.winners"], []);
+    winnersQueue = toArray(winnersRaw).map(String);
+
+    console.log("✅ 已解析:", { drawId, winnersQueue });
+
+    if(!winnersQueue.length){
+      alert("后端未返回 winners，请检查响应。");
+      return;
+    }
+
+    // 切页：用 .hidden 避免两页叠高
+    startPage.classList.add("hidden");
+    drawPage.classList.remove("hidden");
+    window.scrollTo({ top: 0 });
+
+    // 倍速选中态（默认 1x）
+    setActiveSpeed(1);
+
+  }catch(err){
+    console.error("❌ 准备失败:", err);
+    alert("后端连接失败或响应不合法");
+  }
+});
+
+// -------- 倍速（带选中态） --------
+function setActiveSpeed(f){
+  document.querySelectorAll(".speed-btn").forEach(img=>{
+    img.classList.toggle("active", parseInt(img.dataset.speed,10) === f);
+  });
+}
+document.querySelectorAll(".speed-btn").forEach(img=>{
+  img.addEventListener("click", ()=>{
+    const f = parseInt(img.dataset.speed,10);
+    if(Number.isFinite(f) && f > 0){
+      speedFactor = f;
+      setActiveSpeed(f);
+    }
+  });
+});
+
+// -------- 开始：一次点击播完整个 winnersQueue --------
+document.getElementById("startBtn").addEventListener("click", async ()=>{
+  if(!drawId || !winnersQueue.length){
+    alert("请先提交设置并确保后端返回 winners");
+    return;
+  }
+  console.log("▶️ 开始播放，剩余个数:", winnersQueue.length);
+
+  const btn = document.getElementById("startBtn");
+  btn.style.pointerEvents = "none";
+  try{
+    while(winnersQueue.length){
+      const winner = winnersQueue.shift();
+      await playOne(winner);
+      await wait(300);
+    }
+  }finally{
+    btn.style.pointerEvents = "";
+  }
+});
+
+// -------- 播放单个：滚动→停在目标→高亮→入框→粒子 --------
+async function playOne(winner){
+  // 重置 transform，强制 reflow，确保每轮都能动
+  slotList.style.transition = "none";
+  slotList.style.transform  = "translateY(0)";
+  void slotList.offsetHeight;
+
+  // 组装滚动序列：participants 循环多轮，保证滚动距离
+  const cycles = Math.max(12, Math.ceil(3000 / Math.max(1, participants.length)));
+  let html = "";
+  for(let i=0;i<cycles;i++) html += participants.map(id=>`<li>${id}</li>`).join("");
+  slotList.innerHTML = html;
+
+  // 定位目标
+  const items = [...slotList.children];
+  let idx = items.findIndex(li => li.textContent === String(winner));
+  if(idx < 0){                       // 兜底：winner 不在 participants
+    slotList.insertAdjacentHTML("beforeend", `<li>${String(winner)}</li>`);
+    idx = slotList.children.length - 1;
+  }
+
+  const targetRow = 2;               // 可见区第3行（0起）
+  const stopRow   = Math.max(0, idx - targetRow);
+  const targetY   = -stopRow * ROW_H;
+  const spinMs    = Math.max(300, Math.round(BASE_SPIN_MS / speedFactor));
+
+  console.log("🎬 播放一轮:", { winner, totalItems: slotList.children.length, idx, stopRow, targetY, spinMs });
+
+  // 开始滚动
+  slotList.style.transition = `transform ${spinMs}ms cubic-bezier(.15,.85,.25,1)`;
+  slotList.style.transform  = `translateY(${targetY}px)`;
+
+  await wait(spinMs + 60);
+
+  // 高亮中奖项（scale 脉冲，不改字号）
+  const liHit = slotList.children[idx];
+  if(liHit) liHit.classList.add("highlight");
+
+  // 放入 winners 框
+  const li = document.createElement("li");
+  li.textContent = String(winner);
+  winnersList.appendChild(li);
+
+  // 粒子
+  spawnParticles();
+
+  await wait(900);
 }
 
-/* 统一真隐藏 */
-.hidden { display: none !important; }
+// -------- 粒子（大小/旋转随机） --------
+function spawnParticles(){
+  const host = document.getElementById("particlesHost");
+  const imgs = ["coin1.png","coin2.png","coin3.png","gold1.png","gold2.png","gold3.png","diamond.png"];
+  const count = 15 + Math.floor(Math.random()*16); // 15~31
 
-/* 基础布局 */
-*{ box-sizing: border-box; }
-html,body{ margin:0; height:100%; font-family:"Microsoft YaHei",system-ui,Arial; overflow:hidden; }
-.page{
-  position:fixed; inset:0;                   /* 全屏，不占文档高度 */
-  background-size:cover; background-position:center;
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-}
+  for(let i=0;i<count;i++){
+    const el = document.createElement("img");
+    el.src = "img/" + imgs[Math.floor(Math.random()*imgs.length)];
+    el.className = "particle";
 
-/* 开始卡片 */
-.start-card{
-  background: rgba(255,255,255,.86);
-  padding: 16px 18px; border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  display:flex; flex-direction:column; gap:10px; align-items:center;
-}
-.start-card textarea{
-  width: 280px; height: 160px; resize: vertical;
-  padding: 8px; border:none; outline:none; border-radius:8px; font-size:14px;
-  background: rgba(0,0,0,.06);
-}
-.start-card input{
-  width: 280px; padding: 8px; border:none; outline:none; border-radius:8px; font-size:14px;
-  background: rgba(0,0,0,.06);
-}
-.img-btn{ border:0; background:transparent; padding:0; cursor:pointer }
-.img-btn img{ width:180px; display:block }
+    // 随机大小（24~40px）
+    const size = 24 + Math.floor(Math.random()*17);
+    el.style.width = size + "px";
+    el.style.height = size + "px";
 
-/* 老虎机整体放大2倍，不改文档流位置
-   ↑ 增加 margin-bottom，避免与按钮重叠 */
-.slot-scale{
-  transform: scale(2);
-  transform-origin: top center;
-  margin-top: 4px;
-  margin-bottom: 32px;   /* 原 18px → 32px，解决按钮压窗 */
-}
-.slot-wrap{ position:relative; width: var(--slot-base-width); margin:0 auto; }
-.slot-frame{ width:100%; display:block; }
+    el.style.left = Math.random()*window.innerWidth + "px";
+    el.style.transform = `translateY(-50px) rotate(${Math.random()*360}deg)`;
+    host.appendChild(el);
 
-/* 1列5行窗口（加强裁切，杜绝外泄） */
-.slot-window{
-  position:absolute; left:50%; transform: translateX(-50%);
-  top: 58px; width: 130px; height: calc(var(--row-h) * 5);
-  overflow: hidden;
-  z-index:2;
-  clip-path: inset(0);     /* 额外防线：有些设备上 transform 子元素可能“露头” */
-  contain: paint;          /* 独立绘制层，减少溢绘 */
-}
-#slotList{
-  list-style:none; margin:0; padding:0;
-  position:relative; z-index:1;
-  will-change: transform;
-  transition: transform 3s cubic-bezier(.15,.85,.25,1);
-}
-#slotList li{
-  height: var(--row-h); line-height: var(--row-h);
-  text-align:center;
-  font-size:18px;
-  color:#fff;
-  letter-spacing: .5px;
-  text-shadow: 0 1px 2px rgba(0,0,0,.9);
-}
+    const rotateTo = 360 + Math.random()*720; // 360~1080deg
+    requestAnimationFrame(()=>{
+      el.style.transform = `translateY(${window.innerHeight + 80}px) rotate(${rotateTo}deg)`;
+      el.style.opacity = "0";
+    });
 
-/* 高亮：改为纯 scale，不再加字重字号，避免被外层 scale(2)放大过头 */
-#slotList li.highlight{
-  color:#ffd700;
-  font-weight:700;
-  animation: pulseScale .9s ease-in-out 2;
-}
-@keyframes pulseScale{
-  0%{ transform:scale(1) }
-  50%{ transform:scale(1.15) }
-  100%{ transform:scale(1) }
-}
-
-/* 顶/底淡入淡出遮罩 */
-.fade-mask{
-  position:absolute; left:0; width:100%; height:36px; pointer-events:none; z-index:3;
-  background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,0));
-}
-.fade-mask.bottom{ bottom:0; top:auto; transform: rotate(180deg); }
-.fade-mask.top{ top:0; }
-
-/* 控件：整体下移，避免与老虎机重叠；层级低于遮罩 */
-.controls{
-  margin: 10px 0 10px;         /* 原 6/8 → 10/10，进一步下移 */
-  display:flex; gap:16px; align-items:center;
-  z-index:1;
-}
-.controls .img-btn img{ width:120px; }
-
-/* 倍速：增加选中态（active） */
-.speed{ display:flex; gap:8px; margin-bottom:8px; z-index:1; }
-.speed img{
-  width:60px; cursor:pointer; user-select:none;
-  opacity:.85; transition: transform .15s ease, opacity .15s ease, filter .15s ease;
-  filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
-}
-.speed img.active{
-  transform: translateY(-2px) scale(1.05);
-  opacity:1;
-  filter: drop-shadow(0 2px 3px rgba(0,0,0,.45));
-}
-
-/* 中奖框放大1.5倍，固定右下；加滚动避免过多项目溢出 */
-.winners-scale{
-  position:absolute; right:36px; bottom:24px;
-  transform: scale(1.5); transform-origin: bottom right;
-}
-.winners-wrap{ position:relative; width:220px; }
-.winners-frame{ width:100%; display:block; }
-#winnersList{
-  position:absolute; left:50%; transform:translateX(-50%);
-  top:30px; width:76%;
-  max-height: 120px;               /* 大约 6 行 */
-  overflow: auto;
-  list-style:none; margin:0; padding:0 4px;
-  color:#ffe38a;
-  text-shadow:0 1px 2px #000;
-  font-size:16px; line-height:22px;
-}
-
-/* 粒子（大小随机更自然） */
-.particle{
-  position: fixed; top:-50px; left:0;
-  width:34px; height:34px; object-fit:contain;
-  pointer-events:none; z-index:999; opacity:1;
-  transition: transform 3s linear, opacity 3s;
+    setTimeout(()=> el.remove(), 3200);
+  }
 }
