@@ -1,5 +1,4 @@
-// 后端：一次 prepare 返回所有中奖ID；前端逐个播放
-const API_URL = "https://47.236.246.84:24680/api/draw/prepare";
+const API_URL = "https://api88888.heijiaoshou88.workers.dev/api/draw/prepare";
 
 let participants = [];
 let winnersQueue = [];
