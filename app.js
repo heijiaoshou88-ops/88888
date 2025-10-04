@@ -14,7 +14,7 @@ const drawPage    = document.getElementById("drawPage");
 const slotList    = document.getElementById("slotList");
 const winnersList = document.getElementById("winnersList");
 
-// 工具
+// 小工具
 const wait = (ms)=> new Promise(r=>setTimeout(r,ms));
 const getPath = (o,p)=> p.split(".").reduce((a,k)=>a?.[k], o);
 function pickFirst(obj, paths, fallback=null){ for(const p of paths){ const v=getPath(obj,p); if(v!==undefined&&v!==null) return v; } return fallback; }
@@ -56,9 +56,9 @@ document.getElementById("prepareBtn").addEventListener("click", async ()=>{
       return;
     }
 
-    // 页面切换：用 display 避免两个 section 叠加成“长页面”
-    startPage.style.display = "none";
-    drawPage.style.display = "flex";
+    // 页面切换：用 .hidden 避免两页叠高
+    startPage.classList.add("hidden");
+    drawPage.classList.remove("hidden");
     window.scrollTo({ top: 0 });
 
   }catch(err){
@@ -98,7 +98,7 @@ document.getElementById("startBtn").addEventListener("click", async ()=>{
 
 // -------- 播放单个：滚动→停在目标→高亮→入框→粒子 --------
 async function playOne(winner){
-  // 先把上一轮 transform 清零，强制 reflow，避免不动
+  // 重置上轮 transform，强制 reflow，确保新一轮 transition 生效
   slotList.style.transition = "none";
   slotList.style.transform  = "translateY(0)";
   void slotList.offsetHeight;
