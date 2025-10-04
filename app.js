@@ -56,10 +56,13 @@ document.getElementById("prepareBtn").addEventListener("click", async ()=>{
       return;
     }
 
-    // 页面切换：用 .hidden 避免两页叠高
+    // 页面切换（用 .hidden 避免两页叠高）
     startPage.classList.add("hidden");
     drawPage.classList.remove("hidden");
     window.scrollTo({ top: 0 });
+
+    // 初始化倍速选中态（默认 1x）
+    setActiveSpeed(1);
 
   }catch(err){
     console.error("❌ 准备失败:", err);
@@ -67,11 +70,19 @@ document.getElementById("prepareBtn").addEventListener("click", async ()=>{
   }
 });
 
-// -------- 倍速 --------
+// -------- 倍速（新增“选中态”） --------
+function setActiveSpeed(f){
+  document.querySelectorAll(".speed-btn").forEach(img=>{
+    img.classList.toggle("active", parseInt(img.dataset.speed,10) === f);
+  });
+}
 document.querySelectorAll(".speed-btn").forEach(img=>{
   img.addEventListener("click", ()=>{
     const f = parseInt(img.dataset.speed,10);
-    if(Number.isFinite(f)&&f>0) speedFactor = f;
+    if(Number.isFinite(f) && f > 0){
+      speedFactor = f;
+      setActiveSpeed(f);
+    }
   });
 });
 
@@ -130,7 +141,7 @@ async function playOne(winner){
 
   await wait(spinMs + 60);
 
-  // 高亮中奖项
+  // 高亮中奖项（使用 scale 动画，避免放大溢出窗口）
   const liHit = slotList.children[idx];
   if(liHit) liHit.classList.add("highlight");
 
@@ -145,22 +156,29 @@ async function playOne(winner){
   await wait(900);
 }
 
-// -------- 粒子 --------
+// -------- 粒子（增加大小/转速随机） --------
 function spawnParticles(){
   const host = document.getElementById("particlesHost");
   const imgs = ["coin1.png","coin2.png","coin3.png","gold1.png","gold2.png","gold3.png","diamond.png"];
-  const count = 15 + Math.floor(Math.random()*16);
+  const count = 15 + Math.floor(Math.random()*16); // 15~31
 
   for(let i=0;i<count;i++){
     const el = document.createElement("img");
     el.src = "img/" + imgs[Math.floor(Math.random()*imgs.length)];
     el.className = "particle";
+
+    // 随机大小（24~40px）
+    const size = 24 + Math.floor(Math.random()*17);
+    el.style.width = size + "px";
+    el.style.height = size + "px";
+
     el.style.left = Math.random()*window.innerWidth + "px";
     el.style.transform = `translateY(-50px) rotate(${Math.random()*360}deg)`;
     host.appendChild(el);
 
+    const rotateTo = 360 + Math.random()*720; // 360~1080deg
     requestAnimationFrame(()=>{
-      el.style.transform = `translateY(${window.innerHeight + 80}px) rotate(${Math.random()*720}deg)`;
+      el.style.transform = `translateY(${window.innerHeight + 80}px) rotate(${rotateTo}deg)`;
       el.style.opacity = "0";
     });
 
